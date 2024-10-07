@@ -4,21 +4,23 @@ import java.security.Principal;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-
 import hr.fina.student.projekt.enums.Gender;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.experimental.SuperBuilder;
+import java.util.*;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
+@SuperBuilder
 @EqualsAndHashCode(callSuper=false)
 public class User extends BaseEntity implements UserDetails, Principal{
     
@@ -35,7 +37,11 @@ public class User extends BaseEntity implements UserDetails, Principal{
     private String profilePhoto;
     private boolean enabled;
     private boolean accountLocked;
+    private Set<Role> roles;
     
+
+
+   
     public String fullName() {
         return this.firstName + " " + this.lastName;
     }
@@ -57,21 +63,26 @@ public class User extends BaseEntity implements UserDetails, Principal{
 
     @Override
     public String getName() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getName'");
+        return this.email;
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getAuthorities'");
+        return this.roles
+                   .stream()
+                   .map(role -> new SimpleGrantedAuthority(role.getName()))
+                   .collect(Collectors.toList());
     }
 
     @Override
     public String getUsername() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getUsername'");
+        return this.email;
     }
+
+
+
+    
+
 
 
 
