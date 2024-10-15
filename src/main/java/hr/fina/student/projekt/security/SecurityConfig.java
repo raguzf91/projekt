@@ -12,7 +12,6 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import lombok.RequiredArgsConstructor;
-import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
 @EnableWebSecurity
@@ -23,8 +22,8 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final AuthenticationProvider authenticationProvider;
 /**
- * Configure HttpSecurity to only be applied to URLs that start with /api/
- * POST requests to /api/auth/login are open to public, we allow unauthenticated user to access the login endpoint
+ * 
+ * POST requests to /api/auth/**  are open to public, we allow unauthenticated user to access the login and register endpoint
  * Allow access to URLs that start with /user/ to users with USER role
  * Allow access to URLs that start with /admin/ to users with ADMIN role
  * any other request with require authentication
@@ -45,7 +44,7 @@ public class SecurityConfig {
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authenticationProvider(authenticationProvider)
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
-            
+             
         
     return http.build();
  }

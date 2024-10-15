@@ -56,6 +56,7 @@ public class JwtService {
         final String username = extractUsername(token);
         boolean usernameValid = username.equals(userDetails.getUsername());
         return usernameValid && !isTokenExpired(token); 
+        //TODO VERIFY SIGNATURE OF THE TOKEN
 
     }
 
