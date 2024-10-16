@@ -20,7 +20,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.cors(Customizer.withDefaults())
             .csrf(AbstractHttpConfigurer::disable)
-            .authorizeHttpRequests(req -> 
+            .authorizeHttpRequests((req) -> 
                 req.requestMatchers(
                                         "/api/**",
                                         "/signup"
