@@ -1,18 +1,20 @@
 package hr.fina.student.projekt.dto;
 
-import java.util.Set;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.stereotype.Component;
 
 import hr.fina.student.projekt.auth.RegisterRequest;
-import hr.fina.student.projekt.entity.Role;
 import hr.fina.student.projekt.entity.User;
 import hr.fina.student.projekt.enums.Gender;
 import lombok.RequiredArgsConstructor;
 
+
 @RequiredArgsConstructor
+@Component
 public class RegisterToUser {
 
-    private final PasswordEncoder passwordEncoder;
+    private final BCryptPasswordEncoder passwordEncoder;
+
     public User mapToUser(RegisterRequest registerRequest) {
         return User.builder()
             .firstName(registerRequest.getFirstName())
@@ -20,11 +22,9 @@ public class RegisterToUser {
             .email(registerRequest.getEmail())
             .password(passwordEncoder.encode(registerRequest.getPassword()))  // encode password
             .dateOfBirth(registerRequest.getDate())
-            .gender(Gender.valueOf(registerRequest.getGender().toUpperCase()))  // assuming Gender is an enum
+            .gender(Gender.valueOf(registerRequest.getGender().toUpperCase()))
             .phoneNumber(registerRequest.getPhoneNumber())
-            .languages(registerRequest.getLanguages())
-            .profilePhoto(registerRequest.getPhotoUrl())
-            .roles(Set.of(new Role("ROLE_USER")))  // assigning default role to new users
+            .profilePhoto(registerRequest.getPhotoUrl())  // assigning default role to new users
             .build();
     }
     }

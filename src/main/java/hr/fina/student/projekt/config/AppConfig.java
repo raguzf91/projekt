@@ -7,21 +7,21 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-import hr.fina.student.projekt.dao.UserDao;
+import hr.fina.student.projekt.dao.impl.UserDaoImpl;
+import hr.fina.student.projekt.dto.RegisterToUser;
 import lombok.RequiredArgsConstructor;
 
 @Configuration
 @RequiredArgsConstructor
 public class AppConfig {
 
-    private final UserDao repository;
+    private final UserDaoImpl repository;
 
     @Bean
     public UserDetailsService userDetailsService() {
-        return username -> repository.findByEmail(username).orElseThrow(() -> new UsernameNotFoundException("User with this email is not found")); 
+        return username -> repository.findByEmail(username);
  }
 
     // Configure AuthenticationManagerBuilder to use the custom UserDetailsService
@@ -52,5 +52,6 @@ public class AppConfig {
         return new BCryptPasswordEncoder();
 }
 
+   
     
 }

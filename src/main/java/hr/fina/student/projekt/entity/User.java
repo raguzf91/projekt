@@ -3,14 +3,10 @@ package hr.fina.student.projekt.entity;
 import java.security.Principal;
 import java.time.LocalDate;
 import java.util.stream.Collectors;
-
-import org.springframework.data.relational.core.mapping.MappedCollection;
-import org.springframework.data.relational.core.mapping.Table;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import hr.fina.student.projekt.enums.Gender;
-import jakarta.persistence.Entity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -23,14 +19,13 @@ import java.util.*;
 @AllArgsConstructor
 @SuperBuilder
 @EqualsAndHashCode(callSuper=false)
-@Table("Users")
 public class User extends BaseEntity implements UserDetails, Principal{
     
     private String firstName;
     private String lastName;
     private String email;
     private String password;
-    private LocalDate dateOfBirth;
+    private String dateOfBirth;
     private Gender gender;
     private String bio;
     private String phoneNumber;
@@ -39,7 +34,6 @@ public class User extends BaseEntity implements UserDetails, Principal{
     private String profilePhoto;
     private boolean enabled;
     private boolean accountLocked;
-    @MappedCollection(idColumn = "user_id")
     private Set<Role> roles;
     
 
