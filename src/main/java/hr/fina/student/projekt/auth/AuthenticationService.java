@@ -5,6 +5,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.stereotype.Service;
 import hr.fina.student.projekt.dao.impl.UserDaoImpl;
 import hr.fina.student.projekt.entity.User;
+import hr.fina.student.projekt.entity.UserPrincipal;
 import hr.fina.student.projekt.security.JwtService;
 import lombok.RequiredArgsConstructor;
 

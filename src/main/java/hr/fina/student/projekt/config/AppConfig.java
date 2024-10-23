@@ -8,9 +8,7 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-
 import hr.fina.student.projekt.dao.impl.UserDaoImpl;
-import hr.fina.student.projekt.dto.RegisterToUser;
 import lombok.RequiredArgsConstructor;
 
 @Configuration
@@ -21,18 +19,11 @@ public class AppConfig {
 
     @Bean
     public UserDetailsService userDetailsService() {
+        //TODO
         return username -> repository.findByEmail(username);
  }
 
-    // Configure AuthenticationManagerBuilder to use the custom UserDetailsService
-    /*@Autowired
-    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-     auth
-         .userDetailsService(userDetailsService());
-         .passwordEncoder(passwordEncoder())  
-         
-                // Set the PasswordEncoder
- }*/
+  
 
     @Bean
      public AuthenticationProvider authenticationProvider() {

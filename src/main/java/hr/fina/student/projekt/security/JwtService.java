@@ -4,6 +4,8 @@ import java.util.Date;
 import javax.crypto.SecretKey;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import hr.fina.student.projekt.entity.UserPrincipal;
+
 import java.util.Map;
 import java.util.HashMap;
 import io.jsonwebtoken.Claims;
@@ -34,13 +36,13 @@ public class JwtService {
        
     }
 
-    public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
+    public String generateToken(Map<String, Object> extraClaims, UserPrincipal user) {
         return Jwts
             .builder()
             .claims()
             .add(extraClaims)
             .and()
-            .subject(userDetails.getUsername())
+            .subject(user.getUsername())
             .issuedAt(new Date(System.currentTimeMillis()))
             .expiration(new Date(System.currentTimeMillis() + 1000 * 10))
             .signWith(getSigningKey(), SIG.HS256)
@@ -48,8 +50,8 @@ public class JwtService {
              
     }
 
-    public String generateToken(UserDetails userDetails) {
-        return generateToken(new HashMap<>(), userDetails);
+    public String generateToken(UserPrincipal user) {
+        return generateToken(new HashMap<>(), user);
     }
     
     public Boolean validateToken(String token, UserDetails userDetails) {

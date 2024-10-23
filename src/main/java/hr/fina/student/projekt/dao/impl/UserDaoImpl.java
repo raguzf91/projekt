@@ -1,7 +1,6 @@
 package hr.fina.student.projekt.dao.impl;
 
 import java.util.Collection;
-
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -9,27 +8,41 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Repository;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import hr.fina.student.projekt.dao.UserDao;
 import hr.fina.student.projekt.entity.User;
+import hr.fina.student.projekt.entity.UserPrincipal;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import java.util.Map;
 import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-
 import hr.fina.student.projekt.enums.*;
+import java.util.UUID;
+import hr.fina.student.projekt.mapper.UserRowMapper;
+import java.util.List;
 
 @Repository
 @RequiredArgsConstructor
 @Slf4j
-public class UserDaoImpl implements UserDao {
+public class UserDaoImpl implements UserDao, UserDetailsService {
 
     private final NamedParameterJdbcTemplate jdbcTemplate;
     private final RoleDaoImpl roleRepository;
     private final BCryptPasswordEncoder encoder;
     @Override
     public void save(User user) throws DataAccessException {
-        final String SAVE_USER_QUERY = "";
+        final String SAVE_USER_QUERY = """
+        INSERT INTO Users (first_name, last_name, email, password, gender, phone_number, profile_photo) VALUES (:firstName, :lastName, :email, :password, :gender, :phoneNumber, :profilePhoto)
+        """;
+
+        final String INSERT_ACCOUNT_VERIFICATION_URL = """
+                
+            INSERT INTO AccountVerifications (user_id, url) VALUES (:userId, :url)
+                """;
        // check if the email is unique in the database
        if(findByEmail(user.getEmail().trim().toLowerCase()) != null) {
             throw new RuntimeException("Email already in use");
@@ -50,6 +63,10 @@ public class UserDaoImpl implements UserDao {
         // Send verification url
 
         String verificationUrl = getVerificationUrl(VerificationType.ACCOUNT.getType());
+
+        jdbcTemplate.update(INSERT_ACCOUNT_VERIFICATION_URL, Map.of("userId", user.getId(), "url", verificationUrl));
+
+        sendEmail()//TODO imoplementiraj ovo
        } catch (EmptyResultDataAccessException e) {
        
        } catch (Exception e) {
@@ -66,6 +83,9 @@ public class UserDaoImpl implements UserDao {
 
     private String getVerificationUrl(String type) {
         // vrati url servera zbog testiranja
+        String key = UUID.randomUUID().toString();
+        return ServletUriComponentsBuilder.fromCurrentContextPath().path("/user/verify/" + type + "/" + key).toUriString();
+
         
     }
 
@@ -74,7 +94,7 @@ public class UserDaoImpl implements UserDao {
             .addValue("firstName", user.getFirstName())
             .addValue("lastName", user.getLastName())
             .addValue("password", encoder.encode(user.getPassword()))
-            .addValue("gender", user.getGender().name()) //!! potencijalni problem
+            .addValue("gender", user.getGender()) 
             .addValue("dateOfBirth", user.getDateOfBirth())
             .addValue("phoneNumber", user.getPhoneNumber())
             .addValue("profilePhoto", user.getProfilePhoto());
@@ -83,17 +103,29 @@ public class UserDaoImpl implements UserDao {
     @Override
     public User findByEmail(String email) throws DataAccessException {
         final String FIND_USER_BY_EMAIL = """
-                SELECT * FROM Users WHERE Users.email = ?
-                """;
-
-        return jdbcTemplate.queryForObject(FIND_USER_BY_EMAIL, Map.of("email", email), User.class);
+                SELECT * FROM Users WHERE email = :email
+                """;; // TODO
+        try {
+            User user = jdbcTemplate.queryForObject(FIND_USER_BY_EMAIL, Map.of("email", email), new UserRowMapper()) // TODO
+            return user;
+        } catch (EmptyResultDataAccessException exception) {
+            throw new RuntimeException("No User found by email: " + email);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            throw new RuntimeException("An error occured in finding an email");
+        } 
         
     }
 
     @Override
-    public Collection<User> findAllUsers() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'findAllUsers'");
+    public Collection<User> findAllUsers(int pageSize) {
+
+        final String SELECT_ALL_USERS = """
+                SELECT * FROM Users;
+                """;
+        try {
+            List<User> users = jdbcTemplate.queryForList(SELECT_ALL_USERS, ) // TODO
+        }
     }
 
     @Override
@@ -107,6 +139,26 @@ public class UserDaoImpl implements UserDao {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'deleteUser'");
     }
+
+    @Override
+    public User findById(Integer id) throws DataAccessException {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'findById'");
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        //TODO
+        User user = findByEmail(email);
+        if(user == null) {
+            log.error("User not found in the database");
+            throw new UsernameNotFoundException("User not found in the database");
+        } else {
+            log.info("User found in the database: {}", email);
+            return new UserPrincipal(user, roleRepository.getRoleByUserId(user.getId())); //TODO
+        }
+    }
+
 
     
     
