@@ -4,12 +4,12 @@ import org.springframework.dao.DataAccessException;
 import hr.fina.student.projekt.entity.User;
 import java.util.Collection;
 
-public interface UserDao {
+public interface UserDao<T extends User> {
     
-    void save(User user) throws DataAccessException;
-    Collection<User> findAllUsers(int pageSize); // TODO dodati paging
-    User findByEmail(String email) throws DataAccessException;
-    User findById(Integer id) throws DataAccessException;
-    void updateUser(Integer userId);
+    T create(T user) throws DataAccessException;
+    Collection<T> findAllUsers(int pageSize); // TODO dodati paging
+    T findByEmail(String email) throws DataAccessException;
+    T findById(Integer id) throws DataAccessException;
+    T updateUser(Integer userId);
     Boolean deleteUser(Integer userId);
 }

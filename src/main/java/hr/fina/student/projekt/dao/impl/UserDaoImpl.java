@@ -21,6 +21,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import hr.fina.student.projekt.enums.*;
+import hr.fina.student.projekt.exceptions.ApiException;
+
 import java.util.UUID;
 import hr.fina.student.projekt.mapper.UserRowMapper;
 import java.util.List;
@@ -28,13 +30,13 @@ import java.util.List;
 @Repository
 @RequiredArgsConstructor
 @Slf4j
-public class UserDaoImpl implements UserDao, UserDetailsService {
+public class UserDaoImpl implements UserDao<User>, UserDetailsService {
 
     private final NamedParameterJdbcTemplate jdbcTemplate;
     private final RoleDaoImpl roleRepository;
     private final BCryptPasswordEncoder encoder;
     @Override
-    public void save(User user) throws DataAccessException {
+    public User create(User user) throws DataAccessException {
         final String SAVE_USER_QUERY = """
         INSERT INTO Users (first_name, last_name, email, password, gender, phone_number, profile_photo) VALUES (:firstName, :lastName, :email, :password, :gender, :phoneNumber, :profilePhoto)
         """;
@@ -65,20 +67,24 @@ public class UserDaoImpl implements UserDao, UserDetailsService {
         String verificationUrl = getVerificationUrl(VerificationType.ACCOUNT.getType());
 
         jdbcTemplate.update(INSERT_ACCOUNT_VERIFICATION_URL, Map.of("userId", user.getId(), "url", verificationUrl));
-
-        sendEmail()//TODO imoplementiraj ovo
-       } catch (EmptyResultDataAccessException e) {
-       
-       } catch (Exception e) {
-
-       }
-        // TODO: handle exception
-       
-       
+        user.setEnabled(false);
+        user.setAccountLocked(true);
+        return user;
+        //sendEmail()TODO imoplementiraj ovo
+        
        // Save url in the verification table
        // Send email to the user with verificaiton URL
        // Return the user
        // if errors happen, throw exception 
+       } catch (EmptyResultDataAccessException e) {
+        throw new RuntimeException("Couldn't save the user by: " + user.getId());
+       } catch (Exception e) {
+        log.error(e.getMessage());
+        throw new ApiException("An error has occured. Please try again");
+       }
+        // TODO: handle exception
+       
+       
     }
 
     private String getVerificationUrl(String type) {
@@ -104,32 +110,33 @@ public class UserDaoImpl implements UserDao, UserDetailsService {
     public User findByEmail(String email) throws DataAccessException {
         final String FIND_USER_BY_EMAIL = """
                 SELECT * FROM Users WHERE email = :email
-                """;; // TODO
+                """;; 
         try {
-            User user = jdbcTemplate.queryForObject(FIND_USER_BY_EMAIL, Map.of("email", email), new UserRowMapper()) // TODO
+            User user = jdbcTemplate.queryForObject(FIND_USER_BY_EMAIL, Map.of("email", email), new UserRowMapper());
             return user;
         } catch (EmptyResultDataAccessException exception) {
             throw new RuntimeException("No User found by email: " + email);
         } catch (Exception e) {
             log.error(e.getMessage());
-            throw new RuntimeException("An error occured in finding an email");
+            throw new ApiException("An error occured in finding an email");
         } 
         
     }
 
     @Override
     public Collection<User> findAllUsers(int pageSize) {
-
-        final String SELECT_ALL_USERS = """
+        /*final String SELECT_ALL_USERS = """
                 SELECT * FROM Users;
                 """;
         try {
             List<User> users = jdbcTemplate.queryForList(SELECT_ALL_USERS, ) // TODO
-        }
+        } */
+       return null;
+        
     }
 
     @Override
-    public void updateUser(Integer userId) {
+    public User updateUser(Integer userId) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'updateUser'");
     }
@@ -148,14 +155,13 @@ public class UserDaoImpl implements UserDao, UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        //TODO
         User user = findByEmail(email);
         if(user == null) {
             log.error("User not found in the database");
             throw new UsernameNotFoundException("User not found in the database");
         } else {
             log.info("User found in the database: {}", email);
-            return new UserPrincipal(user, roleRepository.getRoleByUserId(user.getId())); //TODO
+            return new UserPrincipal(user, roleRepository.getRoleByUserId(user.getId()));
         }
     }
 

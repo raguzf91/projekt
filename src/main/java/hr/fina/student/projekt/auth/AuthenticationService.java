@@ -7,19 +7,20 @@ import hr.fina.student.projekt.dao.impl.UserDaoImpl;
 import hr.fina.student.projekt.entity.User;
 import hr.fina.student.projekt.entity.UserPrincipal;
 import hr.fina.student.projekt.security.JwtService;
+import hr.fina.student.projekt.service.UserService;
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 public class AuthenticationService {
-
-    private final UserDaoImpl userRepository;
+/* 
+    private final UserService userService;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
 
     public AuthenticationResponse register(User user) {
         
-        userRepository.save(user);
+        userService.createUser(user);
         String jwtToken = jwtService.generateToken(user);
         return AuthenticationResponse.builder()
                 .token(jwtToken)
@@ -40,4 +41,5 @@ public class AuthenticationService {
                 .token(jwtToken)
                 .build();
     }
+                */
 }
