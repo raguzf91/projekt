@@ -2,6 +2,7 @@ package hr.fina.student.projekt.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -28,7 +29,6 @@ public class SecurityConfig {
 
     
     private final JwtAuthenticationFilter jwtAuthFilter;
-    private final AuthenticationProvider authenticationProvider;
     private final BCryptPasswordEncoder encoder;
     private final UserDetailsService userDetailsService;
     
@@ -54,7 +54,7 @@ public class SecurityConfig {
 				.anyRequest().authenticated()               
 			)
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authenticationProvider(authenticationProvider)
+            .authenticationProvider(authenticationProvider())
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
              
         
@@ -62,6 +62,7 @@ public class SecurityConfig {
  }
 
  @Bean
+ @Lazy
  public AuthenticationProvider authenticationProvider() {
      DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
      authProvider.setUserDetailsService(userDetailsService);
