@@ -22,10 +22,9 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import hr.fina.student.projekt.enums.*;
 import hr.fina.student.projekt.exceptions.ApiException;
-
 import java.util.UUID;
 import hr.fina.student.projekt.mapper.UserRowMapper;
-import java.util.List;
+
 
 @Repository
 @RequiredArgsConstructor

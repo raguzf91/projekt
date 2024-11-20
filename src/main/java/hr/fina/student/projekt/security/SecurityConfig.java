@@ -8,6 +8,7 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -22,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
+@EnableMethodSecurity
 public class SecurityConfig {
 
     
@@ -29,6 +31,8 @@ public class SecurityConfig {
     private final AuthenticationProvider authenticationProvider;
     private final BCryptPasswordEncoder encoder;
     private final UserDetailsService userDetailsService;
+    
+    
 /**
  * 
  * POST requests to /api/auth/**  are open to public, we allow unauthenticated user to access the login and register endpoint
@@ -57,13 +61,21 @@ public class SecurityConfig {
     return http.build();
  }
 
+ @Bean
+ public AuthenticationProvider authenticationProvider() {
+     DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+     authProvider.setUserDetailsService(userDetailsService);
+     authProvider.setPasswordEncoder(encoder);
+     return authProvider;
+ }
 
-   @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
-        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-        authProvider.setUserDetailsService(userDetailsService);
-        authProvider.setPasswordEncoder(encoder);
-        return new ProviderManager(authProvider);
-    }
+ @Bean
+ public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
+     return configuration.getAuthenticationManager();
+ }
+
+    
+
+    
     
 }

@@ -2,6 +2,7 @@ package hr.fina.student.projekt.dao.impl;
 
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.stereotype.Repository;
 
 import hr.fina.student.projekt.dao.RoleDao;
 import hr.fina.student.projekt.entity.Role;
@@ -13,6 +14,7 @@ import hr.fina.student.projekt.mapper.RoleRowMapper;
 
 @Slf4j
 @RequiredArgsConstructor
+@Repository
 public class RoleDaoImpl implements RoleDao{
 private final NamedParameterJdbcTemplate jdbc;
     @Override
