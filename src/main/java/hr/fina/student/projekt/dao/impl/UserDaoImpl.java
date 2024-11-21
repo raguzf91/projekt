@@ -37,22 +37,21 @@ public class UserDaoImpl implements UserDao<User>, UserDetailsService {
     @Override
     public User create(User user) throws DataAccessException {
         final String SAVE_USER_QUERY = """
-        INSERT INTO Users (first_name, last_name, email, password, gender, phone_number, profile_photo) VALUES (:firstName, :lastName, :email, :password, :gender, :phoneNumber, :profilePhoto)
+        INSERT INTO users (first_name, last_name, email, password, date_of_birth, user_gender, phone_number, profile_photo) VALUES (:firstName, :lastName, :email, :password, :dateOfBirth, :gender, :phoneNumber, :profilePhoto)
         """;
 
-        final String INSERT_ACCOUNT_VERIFICATION_URL = """
-                
+        final String INSERT_ACCOUNT_VERIFICATION_URL = """ 
             INSERT INTO AccountVerifications (user_id, url) VALUES (:userId, :url)
-                """;
+            """;
        // check if the email is unique in the database
        if(findByEmail(user.getEmail().trim().toLowerCase()) != null) {
-            throw new RuntimeException("Email already in use");
+            throw new ApiException("Email already in use");
        }
        // save new user
        try {
         KeyHolder holder = new GeneratedKeyHolder();
         SqlParameterSource params = getSqlParameterSource(user);
-        jdbcTemplate.update(SAVE_USER_QUERY, params, holder);
+        jdbcTemplate.update(SAVE_USER_QUERY, params, holder, new String [] {"id"});
 
         // podstavi id korisniku iz holdera
         user.setId((Integer)holder.getKey());
@@ -99,6 +98,7 @@ public class UserDaoImpl implements UserDao<User>, UserDetailsService {
             .addValue("firstName", user.getFirstName())
             .addValue("lastName", user.getLastName())
             .addValue("password", encoder.encode(user.getPassword()))
+            .addValue("email", user.getEmail())
             .addValue("gender", user.getGender()) 
             .addValue("dateOfBirth", user.getDateOfBirth())
             .addValue("phoneNumber", user.getPhoneNumber())
@@ -114,7 +114,7 @@ public class UserDaoImpl implements UserDao<User>, UserDetailsService {
             User user = jdbcTemplate.queryForObject(FIND_USER_BY_EMAIL, Map.of("email", email), new UserRowMapper());
             return user;
         } catch (EmptyResultDataAccessException exception) {
-            throw new RuntimeException("No User found by email: " + email);
+            return null;
         } catch (Exception e) {
             log.error(e.getMessage());
             throw new ApiException("An error occured in finding an email");

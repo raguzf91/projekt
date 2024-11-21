@@ -1,5 +1,6 @@
 package hr.fina.student.projekt.dto;
 
+import java.util.Date;
 import java.util.List;
 
 import lombok.AllArgsConstructor;
@@ -19,7 +20,7 @@ public class UserDTO {
     private String lastName;
     private String email;
     private String password;
-    private Integer dateOfBirth;
+    private Date dateOfBirth;
     private String gender;
     private String bio;
     private String phoneNumber;

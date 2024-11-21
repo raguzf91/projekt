@@ -26,11 +26,11 @@ public class UserRowMapper implements RowMapper<User>{
         .lastName(rs.getString("last_name"))
         .email(rs.getString("email"))
         .password(rs.getString("password"))
-        .gender(rs.getString("gender"))
+        .gender(rs.getString("user_gender"))
         .phoneNumber(rs.getString("phone_number"))
         .profilePhoto(rs.getString("profile_photo"))
         .bio(rs.getString("bio"))
-        .dateOfBirth(rs.getInt("date_of_birth"))
+        .dateOfBirth(rs.getDate("date_of_birth"))
         .languages(languages) // TODO
         .responseRate(rs.getDouble("response_rate"))
         .profilePhoto(rs.getString("profile_photo"))

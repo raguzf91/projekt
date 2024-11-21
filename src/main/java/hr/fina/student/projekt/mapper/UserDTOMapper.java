@@ -14,7 +14,7 @@ public class UserDTOMapper {
 
     public static UserDTO fromUser(User user, Role role) {
         UserDTO userDTO = new UserDTO();
-        BeanUtils.copyProperties(user, userDTO);
+        BeanUtils.copyProperties(user, userDTO); //!!! potencijalni problem
         userDTO.setRoleName(role.getName());
         userDTO.setPermissions(role.getPermission());
         return userDTO;
