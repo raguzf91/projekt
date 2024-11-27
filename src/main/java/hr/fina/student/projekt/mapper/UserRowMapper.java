@@ -26,7 +26,7 @@ public class UserRowMapper implements RowMapper<User>{
         .lastName(rs.getString("last_name"))
         .email(rs.getString("email"))
         .password(rs.getString("password"))
-        .gender(rs.getString("user_gender"))
+        .userGender(rs.getString("user_gender"))
         .phoneNumber(rs.getString("phone_number"))
         .profilePhoto(rs.getString("profile_photo"))
         .bio(rs.getString("bio"))

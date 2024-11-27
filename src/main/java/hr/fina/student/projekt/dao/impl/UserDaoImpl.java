@@ -37,7 +37,7 @@ public class UserDaoImpl implements UserDao<User>, UserDetailsService {
     @Override
     public User create(User user) throws DataAccessException {
         final String SAVE_USER_QUERY = """
-        INSERT INTO users (first_name, last_name, email, password, date_of_birth, user_gender, phone_number, profile_photo) VALUES (:firstName, :lastName, :email, :password, :dateOfBirth, :gender, :phoneNumber, :profilePhoto)
+        INSERT INTO users (first_name, last_name, email, password, date_of_birth, user_gender, phone_number, profile_photo) VALUES (:firstName, :lastName, :email, :password, :dateOfBirth, :userGender, :phoneNumber, :profilePhoto)
         """;
 
         final String INSERT_ACCOUNT_VERIFICATION_URL = """ 
@@ -99,7 +99,7 @@ public class UserDaoImpl implements UserDao<User>, UserDetailsService {
             .addValue("lastName", user.getLastName())
             .addValue("password", encoder.encode(user.getPassword()))
             .addValue("email", user.getEmail())
-            .addValue("gender", user.getGender()) 
+            .addValue("userGender", user.getUserGender()) 
             .addValue("dateOfBirth", user.getDateOfBirth())
             .addValue("phoneNumber", user.getPhoneNumber())
             .addValue("profilePhoto", user.getProfilePhoto());
