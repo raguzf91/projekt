@@ -33,7 +33,7 @@ private final NamedParameterJdbcTemplate jdbc;
             throw new RuntimeException("Error fetching role by name:" + roleName);
         } catch (Exception e) {
             log.error("Error adding role to the User");
-            throw new ApiException("An error has occured");
+            e.getMessage();
         }
         
     }
