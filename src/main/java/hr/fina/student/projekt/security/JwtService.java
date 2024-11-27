@@ -4,7 +4,6 @@ import javax.crypto.SecretKey;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import hr.fina.student.projekt.entity.UserPrincipal;
 import java.util.Map;
 import java.util.function.Function;

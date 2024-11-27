@@ -42,7 +42,7 @@ private final NamedParameterJdbcTemplate jdbc;
     public Role getRoleByUserId(Integer userId) {
         log.info("Fetching role for user id: {} ", userId);
         final String SELECT_ROLE_BY_USER_ID = """
-                SELECT r.id, r.name, r.permission 
+                SELECT r.id, r.name, r.permissions 
                 FROM Roles r 
                 JOIN UserRoles ur ON ur.role_id = r.id 
                 JOIN Users u ON u.id = ur.user_id 
