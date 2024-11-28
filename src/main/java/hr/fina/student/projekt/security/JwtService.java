@@ -1,13 +1,20 @@
 package hr.fina.student.projekt.security;
 import java.util.Date;
 import javax.crypto.SecretKey;
+
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Service;
 import hr.fina.student.projekt.entity.UserPrincipal;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.HashMap;
+import java.util.List;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
@@ -16,6 +23,7 @@ import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.io.Encoders;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import io.jsonwebtoken.Jwts.SIG;
 
@@ -34,8 +42,14 @@ public class JwtService {
 
 
     public String extractUsername(String jwtToken) {
-        return extractClaim(jwtToken, Claims::getSubject);
-        
+        try {
+            log.info("Extracting username from the token");
+            return extractClaim(jwtToken, Claims::getSubject);
+        } catch (UnsupportedJwtException e) {
+            throw new UnsupportedJwtException("Invalid JWT token");
+        } catch(Exception e) {
+            throw new RuntimeException("Unexpected error extracting username from token");
+        }
     }
 
 
@@ -130,8 +144,37 @@ public class JwtService {
         return extractClaim(token, Claims::getExpiration);
     }
 
+    public List<GrantedAuthority> extractAuthorities(String token) {
+        log.info("Extracting authorities from the token");
+        try {
+            Claims claims = extractAllClaims(token);
+            List<?> authoritiesRaw = claims.get("authorities", List.class);
+            List<String> authorities = authoritiesRaw.stream()
+                .filter(String.class::isInstance)
+                .map(String.class::cast)
+                .collect(Collectors.toList());
+            return authorities.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList());
+        } catch (JwtException e) {
+            log.error("Error extracting authorities from token: {}", e.getMessage());
+            throw new UnsupportedJwtException("Invalid JWT token");
+        } catch (Exception e) {
+            log.error("Unexpected error extracting authorities from token: {}", e.getMessage());
+            throw new RuntimeException("Unexpected error extracting authorities from token");
+        }
+    }
+
+    // Kreiramo neautentificiranog korisnika kojeg spring security autentificira
+    //
+    public Authentication getAuthentication(String email, List<GrantedAuthority> authorities, HttpServletRequest request) {
+        UsernamePasswordAuthenticationToken authToken =  new UsernamePasswordAuthenticationToken(email, null, authorities);
+        authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+        return authToken;
+    }
+
+
+
     
-    //TODO PRONAČI NAČIN KAKO EXTRACTAT AUTHORITIES (CUSTOM CLAIM) IZ TOKENA
+    
 
 
     

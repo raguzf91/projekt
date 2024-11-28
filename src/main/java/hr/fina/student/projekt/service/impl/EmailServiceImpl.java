@@ -20,15 +20,14 @@ public class EmailServiceImpl implements EmailService{@Override
             message.setFrom("filip");
             message.setTo(email);
             message.setText(getEmailMessage(firstName, verificationUrl, verificationType));
-                            
-            
-            
-            private String getEmailMessage(String firstName, String verificationUrl, VerificationType verificationType) {
-                // TODO Auto-generated method stub
-                throw new UnsupportedOperationException("Unimplemented method 'getEmailMessage'");
-            }
-}
-
-            }
+        } catch (Exception e) {
+            log.error("Failed to send verification email", e);
         }
+    }
+
+    private String getEmailMessage(String firstName, String verificationUrl, VerificationType verificationType) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getEmailMessage'");
+    }
+}
 
