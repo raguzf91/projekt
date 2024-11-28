@@ -37,7 +37,7 @@ public class UserDaoImpl implements UserDao<User>, UserDetailsService {
     @Override
     public User create(User user) throws DataAccessException {
         final String SAVE_USER_QUERY = """
-        INSERT INTO users (first_name, last_name, email, password, date_of_birth, user_gender, phone_number, profile_photo) VALUES (:firstName, :lastName, :email, :password, :dateOfBirth, :userGender, :phoneNumber, :profilePhoto)
+        INSERT INTO users (first_name, last_name, email, password, date_of_birth, user_gender, bio, phone_number, response_rate, profile_photo) VALUES (:firstName, :lastName, :email, :password, :dateOfBirth, :userGender, :bio, :phoneNumber, :responseRate, :profilePhoto)
         """;
 
         final String INSERT_ACCOUNT_VERIFICATION_URL = """ 
@@ -61,19 +61,19 @@ public class UserDaoImpl implements UserDao<User>, UserDetailsService {
         roleRepository.addRoleToUser(user.getId(), RoleType.ROLE_USER.name());
 
         // Send verification url
-
         String verificationUrl = getVerificationUrl(VerificationType.ACCOUNT.getType());
-
-        jdbcTemplate.update(INSERT_ACCOUNT_VERIFICATION_URL, Map.of("userId", user.getId(), "url", verificationUrl));
         user.setEnabled(false);
         user.setAccountLocked(true);
-        return user;
+        jdbcTemplate.update(INSERT_ACCOUNT_VERIFICATION_URL, Map.of("userId", user.getId(), "url", verificationUrl));
+        
+
         //sendEmail()TODO imoplementiraj ovo
         
        // Save url in the verification table
        // Send email to the user with verificaiton URL
        // Return the user
-       // if errors happen, throw exception 
+       // if errors happen, throw exception
+           return user;
        } catch (EmptyResultDataAccessException e) {
         throw new RuntimeException("Couldn't save the user by: " + user.getId());
        } catch (Exception e) {
@@ -101,8 +101,11 @@ public class UserDaoImpl implements UserDao<User>, UserDetailsService {
             .addValue("email", user.getEmail())
             .addValue("userGender", user.getUserGender()) 
             .addValue("dateOfBirth", user.getDateOfBirth())
+            .addValue("bio", user.getBio())
             .addValue("phoneNumber", user.getPhoneNumber())
+            .addValue("responseRate", user.getResponseRate())
             .addValue("profilePhoto", user.getProfilePhoto());
+            //.addValue("speaksLanguages", user.getSpeaksLanguages());
     }
 
     @Override
@@ -116,7 +119,7 @@ public class UserDaoImpl implements UserDao<User>, UserDetailsService {
         } catch (EmptyResultDataAccessException exception) {
             return null;
         } catch (Exception e) {
-            log.error(e.getMessage());
+            log.error(e.getCause().toString());
             throw new ApiException("An error occured in finding an email");
         } 
         

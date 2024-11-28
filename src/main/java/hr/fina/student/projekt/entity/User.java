@@ -21,8 +21,8 @@ public class User extends BaseEntity {
     private String userGender;
     private String bio;
     private String phoneNumber;
-    private List<String> languages;
-    private Double responseRate;
+    private String[] speaksLanguages;
+    private Integer responseRate;
     private String profilePhoto;
     private boolean enabled;
     private boolean accountLocked;
