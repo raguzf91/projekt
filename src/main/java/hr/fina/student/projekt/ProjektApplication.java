@@ -12,7 +12,8 @@ import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.services.gmail.Gmail;
 import com.google.api.services.gmail.model.Label;
 import com.google.api.services.gmail.model.ListLabelsResponse;
-import hr.fina.student.projekt.service.MailService;
+
+import hr.fina.student.projekt.service.impl.EmailService;
 @SpringBootApplication
 public class ProjektApplication {
 	
