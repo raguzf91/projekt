@@ -4,7 +4,7 @@ import org.springframework.dao.DataAccessException;
 import hr.fina.student.projekt.entity.User;
 import java.util.Collection;
 
-public interface UserDao<T extends User> {
+public interface    UserDao<T extends User> {
     
     T create(T user) throws DataAccessException;
     Collection<T> findAllUsers(int pageSize); // TODO dodati paging

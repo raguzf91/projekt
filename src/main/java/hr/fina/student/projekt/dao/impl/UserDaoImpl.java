@@ -8,7 +8,6 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Repository;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import hr.fina.student.projekt.dao.UserDao;
 import hr.fina.student.projekt.entity.User;
 import hr.fina.student.projekt.entity.UserPrincipal;
@@ -22,7 +21,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import hr.fina.student.projekt.enums.*;
 import hr.fina.student.projekt.exceptions.ApiException;
-import java.util.UUID;
 import hr.fina.student.projekt.mapper.UserRowMapper;
 
 
@@ -37,7 +35,7 @@ public class UserDaoImpl implements UserDao<User>, UserDetailsService {
     @Override
     public User create(User user) throws DataAccessException {
         final String SAVE_USER_QUERY = """
-        INSERT INTO users (first_name, last_name, email, password, date_of_birth, user_gender, bio, phone_number, response_rate, profile_photo) VALUES (:firstName, :lastName, :email, :password, :dateOfBirth, :userGender, :bio, :phoneNumber, :responseRate, :profilePhoto)
+        INSERT INTO users (first_name, last_name, email, password, date_of_birth, user_gender, bio, phone_number, response_rate, profile_photo, account_locked, enabled) VALUES (:firstName, :lastName, :email, :password, :dateOfBirth, :userGender, :bio, :phoneNumber, :responseRate, :profilePhoto, :accountLocked, :enabled)
         """;
 
         
@@ -49,27 +47,18 @@ public class UserDaoImpl implements UserDao<User>, UserDetailsService {
        try {
         KeyHolder holder = new GeneratedKeyHolder();
         SqlParameterSource params = getSqlParameterSource(user);
+        user.setEnabled(false);
+        user.setAccountLocked(true);
         jdbcTemplate.update(SAVE_USER_QUERY, params, holder, new String [] {"id"});
 
         // podstavi id korisniku iz holdera
         user.setId((Integer)holder.getKey());
 
-        // Add and save the role to the user
+        // Add and save the role    to the user
 
-        roleRepository.addRoleToUser(user.getId(), RoleType.ROLE_USER.name());
-
-        // Send verification url
-        
-        
-
-        //sendEmail()TODO imoplementiraj ovo
-        
-       // Save url in the verification table
-       // Send email to the user with verificaiton URL
-       // Return the user
-       // if errors happen, throw exception
+        roleRepository.addRoleToUser(user.getId(), RoleType.ROLE_USER.name());                              
            return user;
-       } catch (EmptyResultDataAccessException e) {
+       } catch (EmptyResultDataAccessException e) {                                                                                                                                     
         throw new RuntimeException("Couldn't save the user by: " + user.getId());
        } catch (Exception e) {
         log.error(e.getMessage());
@@ -80,13 +69,13 @@ public class UserDaoImpl implements UserDao<User>, UserDetailsService {
        
     }
 
-    private String getVerificationUrl(String type) {
+    /*private String getVerificationUrl(String type) {
         // vrati url servera zbog testiranja
         String key = UUID.randomUUID().toString();
         return ServletUriComponentsBuilder.fromCurrentContextPath().path("/user/verify/" + type + "/" + key).toUriString();
 
         
-    }
+    }*/
 
     private SqlParameterSource getSqlParameterSource(User user) {
         return new MapSqlParameterSource()
@@ -99,7 +88,9 @@ public class UserDaoImpl implements UserDao<User>, UserDetailsService {
             .addValue("bio", user.getBio())
             .addValue("phoneNumber", user.getPhoneNumber())
             .addValue("responseRate", user.getResponseRate())
-            .addValue("profilePhoto", user.getProfilePhoto());
+            .addValue("profilePhoto", user.getProfilePhoto())
+            .addValue("accountLocked", user.isAccountLocked())
+            .addValue("enabled", user.isEnabled());
             //.addValue("speaksLanguages", user.getSpeaksLanguages());
     }
 

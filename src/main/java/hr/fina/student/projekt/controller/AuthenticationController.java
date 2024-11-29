@@ -13,8 +13,10 @@ import hr.fina.student.projekt.request.LoginRequest;
 import hr.fina.student.projekt.request.RegisterRequest;
 import hr.fina.student.projekt.response.HttpResponse;
 import hr.fina.student.projekt.security.JwtService;
+import hr.fina.student.projekt.service.EmailService;
 import hr.fina.student.projekt.service.RoleService;
 import hr.fina.student.projekt.service.UserService;
+import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -46,14 +48,15 @@ public class AuthenticationController {
     private final AuthenticationManager authenticationManager;
     private final JwtService tokerProvider;
     private final ActivationTokenDao activationTokenRepository;
-    
+    private final EmailService emailService;
+    private final String ACTIVATION_URL = "http://localhost:8080/api/auth/account-verification";
     @PostMapping("/register")
-    public ResponseEntity<HttpResponse> register(@RequestBody @Valid RegisterRequest request) {
+    public ResponseEntity<HttpResponse> register(@RequestBody @Valid RegisterRequest request) throws MessagingException {
 
         User user = userService.createUser(registerRequestToUser(request));
 
         // send verification mail
-        sendVerificationEmail()
+        sendVerificationEmail(user);
         // when verified enable user account -> user.setEnabled(true)
         //when enabled unlock account
         UserDTO userDTO = fromUser(user, roleService.getRoleByUserId(user.getId()));
@@ -120,9 +123,9 @@ public class AuthenticationController {
         return new UserPrincipal(userService.findUserByEmail(user.getEmail()), roleService.getRoleByUserId(user.getId()));
     }
 
-    private void sendVerificationEmail(User user) {
+    private void sendVerificationEmail(User user) throws MessagingException {
         String activationKey = generateAndSaveActivationToken(user);
-        //TODOsend email
+        emailService.sendVerificationEmail(user.getFirstName(), user.getEmail(), ACTIVATION_URL, activationKey, "activateAccount");
     }
         
            

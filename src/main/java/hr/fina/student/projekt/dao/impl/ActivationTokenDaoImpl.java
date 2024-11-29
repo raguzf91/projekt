@@ -20,10 +20,10 @@ public class ActivationTokenDaoImpl implements ActivationTokenDao {
             log.info("Saving activation token for user");
             final String SAVE_TOKEN = "INSERT INTO ActivationTokens (key, user_id, created_at, expires_at) VALUES (:key, :userId, :createdAt, :expiresAt)";
     
-            jdbcTemplate.update(SAVE_TOKEN, Map.of("key", activationToken.getKey(), "userId)", activationToken.getUser().getId(), "createdAt", activationToken.getCreatedAt(), "expiresAt", activationToken.getExpiresAt()));
+            jdbcTemplate.update(SAVE_TOKEN, Map.of("key", activationToken.getKey(), "userId", activationToken.getUser().getId(), "createdAt", activationToken.getCreatedAt(), "expiresAt", activationToken.getExpiresAt()));
         } catch (Exception e) {
             log.error("Error saving activation token");
-            e.getCause().toString();
+            throw new RuntimeException(e.getMessage());
         }
        
     }

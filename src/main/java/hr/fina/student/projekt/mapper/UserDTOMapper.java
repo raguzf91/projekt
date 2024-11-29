@@ -15,7 +15,6 @@ public class UserDTOMapper {
     public static UserDTO fromUser(User user, Role role) {
         return UserDTO.builder()
                 .email(user.getEmail())
-                .password(user.getPassword())
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
                 .phoneNumber(user.getPhoneNumber())
