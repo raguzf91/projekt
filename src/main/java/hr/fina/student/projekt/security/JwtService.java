@@ -72,7 +72,7 @@ public class JwtService {
 
     //TODO OVO PROVJERI
     private Map<String, Object> getClaimsFromUser(UserPrincipal userPrincipal) {
-        String[] claims = userPrincipal.getAuthorities().stream().map(GrantedAuthority::getAuthority).toArray(String[]::new);
+        List<String> claims = userPrincipal.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList();
         HashMap<String, Object> claimsMap = new HashMap<>();
         claimsMap.put("authorities", claims);
 

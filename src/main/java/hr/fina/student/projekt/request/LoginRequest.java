@@ -1,14 +1,15 @@
 package hr.fina.student.projekt.request;
-
 import jakarta.validation.constraints.NotEmpty;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 
 @Data
+@AllArgsConstructor
 public class LoginRequest {
     
-    @NotEmpty
+    @NotEmpty(message = "Email is required")
     private String email;
-    @NotEmpty
+    @NotEmpty(message = "Password is required")
     private String password;
 }

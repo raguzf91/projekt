@@ -40,9 +40,7 @@ public class UserDaoImpl implements UserDao<User>, UserDetailsService {
         INSERT INTO users (first_name, last_name, email, password, date_of_birth, user_gender, bio, phone_number, response_rate, profile_photo) VALUES (:firstName, :lastName, :email, :password, :dateOfBirth, :userGender, :bio, :phoneNumber, :responseRate, :profilePhoto)
         """;
 
-        final String INSERT_ACCOUNT_VERIFICATION_URL = """ 
-            INSERT INTO AccountVerifications (user_id, url) VALUES (:userId, :url)
-            """;
+        
        // check if the email is unique in the database
        if(findByEmail(user.getEmail().trim().toLowerCase()) != null) {
             throw new ApiException("Email already in use");
@@ -61,10 +59,7 @@ public class UserDaoImpl implements UserDao<User>, UserDetailsService {
         roleRepository.addRoleToUser(user.getId(), RoleType.ROLE_USER.name());
 
         // Send verification url
-        String verificationUrl = getVerificationUrl(VerificationType.ACCOUNT.getType());
-        user.setEnabled(false);
-        user.setAccountLocked(true);
-        jdbcTemplate.update(INSERT_ACCOUNT_VERIFICATION_URL, Map.of("userId", user.getId(), "url", verificationUrl));
+        
         
 
         //sendEmail()TODO imoplementiraj ovo

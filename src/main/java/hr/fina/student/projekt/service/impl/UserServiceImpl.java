@@ -16,13 +16,13 @@ public class UserServiceImpl implements UserService {
     private final RoleDao roleRepository;
 
     @Override
-    public UserDTO createUser(User user) {
-        return mapToUserDTO(userRepository.create(user));
+    public User createUser(User user) {
+        return userRepository.create(user);
     }
 
     @Override
-    public UserDTO findUserByEmail(String email) {
-        return mapToUserDTO(userRepository.findByEmail(email));
+    public User findUserByEmail(String email) {
+        return userRepository.findByEmail(email);
     }
     
     private UserDTO mapToUserDTO(User user) {

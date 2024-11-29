@@ -4,9 +4,7 @@ import java.util.Collection;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import hr.fina.student.projekt.dto.UserDTO;
 import lombok.RequiredArgsConstructor;
-import static hr.fina.student.projekt.mapper.UserDTOMapper.fromUser;
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toList;
 
@@ -49,8 +47,12 @@ public class UserPrincipal implements UserDetails {
         return this.user.isEnabled();
     }
 
-    public UserDTO getUser() {
-        return fromUser(this.user, role);
+    public User getUser() {
+        return this.user;
+    }
+
+    public Role getRole() {
+        return this.role;
     }
 
 

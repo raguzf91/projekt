@@ -21,7 +21,7 @@ public class User extends BaseEntity {
     private String userGender;
     private String bio;
     private String phoneNumber;
-    private String[] speaksLanguages;
+    private List<String> speaksLanguages;
     private Integer responseRate;
     private String profilePhoto;
     private boolean enabled;
