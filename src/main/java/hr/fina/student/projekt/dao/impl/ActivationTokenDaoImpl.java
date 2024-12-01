@@ -1,14 +1,11 @@
 package hr.fina.student.projekt.dao.impl;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Map;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 import hr.fina.student.projekt.dao.ActivationTokenDao;
 import hr.fina.student.projekt.entity.ActivationToken;
-import hr.fina.student.projekt.exceptions.ApiException;
+import hr.fina.student.projekt.exceptions.database.DatabaseException;
 import hr.fina.student.projekt.mapper.TokenRowMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,7 +24,7 @@ public class ActivationTokenDaoImpl implements ActivationTokenDao {
             jdbcTemplate.update(SAVE_TOKEN, Map.of("key", activationToken.getKey(), "userId", activationToken.getUser().getId(), "createdAt", activationToken.getCreatedAt(), "expiresAt", activationToken.getExpiresAt()));
         } catch (Exception e) {
             log.error("Error saving activation token");
-            throw new RuntimeException(e.getMessage());
+            throw new DatabaseException("An error has occured in saving token");
         }
        
     }
@@ -45,7 +42,7 @@ public class ActivationTokenDaoImpl implements ActivationTokenDao {
             return null;
         } catch (Exception e) {
             log.error(e.getCause().toString());
-            throw new ApiException("An error has occured in verifying key");
+            throw new DatabaseException("An error has occured in finding token");
         } 
     }
 
@@ -60,7 +57,7 @@ public class ActivationTokenDaoImpl implements ActivationTokenDao {
             return true;
         } catch (Exception e) {
             log.error("Error updating activation token");
-            throw new ApiException("An error has occured in updating token");
+            throw new DatabaseException("An error has occured in updating token");
         }
     }
     

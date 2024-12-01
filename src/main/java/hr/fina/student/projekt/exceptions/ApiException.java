@@ -1,5 +1,17 @@
 package hr.fina.student.projekt.exceptions;
 
-public class ApiException extends RuntimeException{
-    public ApiException(String message) { super(message); }
+import hr.fina.student.projekt.enums.ErrorCode;
+
+public class ApiException extends RuntimeException {
+    
+        private final ErrorCode errorCode;
+    
+        public ApiException(String message, ErrorCode errorCode) {
+            super(message);
+            this.errorCode = errorCode;
+        }
+    
+        public ErrorCode getErrorCode() {
+            return errorCode;
+        }
 }

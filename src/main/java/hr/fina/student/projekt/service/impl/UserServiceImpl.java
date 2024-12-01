@@ -6,6 +6,8 @@ import hr.fina.student.projekt.dao.UserDao;
 import hr.fina.student.projekt.entity.ActivationToken;
 import hr.fina.student.projekt.entity.User;
 import hr.fina.student.projekt.exceptions.ApiException;
+import hr.fina.student.projekt.exceptions.key.InvalidKeyException;
+import hr.fina.student.projekt.exceptions.key.KeyExpiredException;
 import hr.fina.student.projekt.dto.UserDTO;
 import static hr.fina.student.projekt.mapper.UserDTOMapper.*;
 
@@ -51,7 +53,7 @@ public class UserServiceImpl implements UserService {
            savedToken = tokenRepository.findByKey(key);
         } catch (Exception e) {
             log.error("Error finding token");
-            throw new ApiException("Invalid key");
+            throw new InvalidKeyException("Key is incorrect. Please enter a valid key");
         }
 
         User user = findUserById(savedToken.getUser().getId());
@@ -59,7 +61,7 @@ public class UserServiceImpl implements UserService {
         if(LocalDateTime.now().isAfter(savedToken.getExpiresAt())) {
                log.error("Token expired");
                sendVerificationEmail(user);
-               throw new ApiException("Token expired. a new one has been sent to your email");
+               throw new KeyExpiredException("Key has expired. Please check your email for a new key");
             }
         user.setEnabled(true);
         user.setAccountLocked(false);

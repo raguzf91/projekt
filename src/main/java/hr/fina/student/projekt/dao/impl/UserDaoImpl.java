@@ -20,7 +20,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import hr.fina.student.projekt.enums.*;
-import hr.fina.student.projekt.exceptions.ApiException;
+import hr.fina.student.projekt.exceptions.database.DatabaseException;
+import hr.fina.student.projekt.exceptions.user.UserAlreadyExistsException;
 import hr.fina.student.projekt.mapper.UserRowMapper;
 
 
@@ -41,10 +42,11 @@ public class UserDaoImpl implements UserDao<User>, UserDetailsService {
         
        // check if the email is unique in the database
        if(findByEmail(user.getEmail().trim().toLowerCase()) != null) {
-            throw new ApiException("Email already in use");
+            throw new UserAlreadyExistsException("User with email: " + user.getEmail() + " already exists. Please try again");
        }
        // save new user
        try {
+        log.info("Saving user: {}");
         KeyHolder holder = new GeneratedKeyHolder();
         SqlParameterSource params = getSqlParameterSource(user);
         user.setEnabled(false);
@@ -58,24 +60,15 @@ public class UserDaoImpl implements UserDao<User>, UserDetailsService {
 
         roleRepository.addRoleToUser(user.getId(), RoleType.ROLE_USER.name());                              
            return user;
-       } catch (EmptyResultDataAccessException e) {                                                                                                                                     
-        throw new RuntimeException("Couldn't save the user by: " + user.getId());
        } catch (Exception e) {
-        log.error(e.getMessage());
-        throw new ApiException("An error has occured. Please try again");
+        log.error("Couldn't save user");
+        throw new DatabaseException("An error has occured. Please try again");
        }
         // TODO: handle exception
        
        
     }
 
-    /*private String getVerificationUrl(String type) {
-        // vrati url servera zbog testiranja
-        String key = UUID.randomUUID().toString();
-        return ServletUriComponentsBuilder.fromCurrentContextPath().path("/user/verify/" + type + "/" + key).toUriString();
-
-        
-    }*/
 
     private SqlParameterSource getSqlParameterSource(User user) {
         return new MapSqlParameterSource()
@@ -105,8 +98,8 @@ public class UserDaoImpl implements UserDao<User>, UserDetailsService {
         } catch (EmptyResultDataAccessException exception) {
             return null;
         } catch (Exception e) {
-            log.error(e.getCause().toString());
-            throw new ApiException("An error occured in finding an email");
+            log.error("Error finding user by email");
+            throw new DatabaseException("An error occured in finding an email");
         } 
         
     }
@@ -133,7 +126,7 @@ public class UserDaoImpl implements UserDao<User>, UserDetailsService {
             return true;
         } catch (Exception e) {
             log.error(e.getCause().toString());
-            throw new ApiException("An error occured in updating the user");
+            throw new DatabaseException("An error occured in updating the user");
         }
         
                         
@@ -149,14 +142,15 @@ public class UserDaoImpl implements UserDao<User>, UserDetailsService {
         final String FIND_USER_BY_ID = """
                 SELECT * FROM Users WHERE id = :id
                 """;
+                log.info("Finding user by id: {}");
         try {
             User user = jdbcTemplate.queryForObject(FIND_USER_BY_ID, Map.of("id", id), new UserRowMapper());
             return user;
         } catch (EmptyResultDataAccessException exception) {
             return null;
         } catch (Exception e) {
-            log.error(e.getCause().toString());
-            throw new ApiException("An error occured in finding an email");
+            log.error("Error finding user by id");
+            throw new DatabaseException("An error occured in finding the user by id");
         }
     }
 

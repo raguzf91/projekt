@@ -10,6 +10,7 @@ import hr.fina.student.projekt.entity.ActivationToken;
 import hr.fina.student.projekt.entity.User;
 import hr.fina.student.projekt.entity.UserPrincipal;
 import hr.fina.student.projekt.exceptions.ApiException;
+import hr.fina.student.projekt.exceptions.user.UserUnauthorizedException;
 import hr.fina.student.projekt.request.LoginRequest;
 import hr.fina.student.projekt.request.RegisterRequest;
 import hr.fina.student.projekt.response.HttpResponse;
@@ -68,7 +69,7 @@ public class AuthenticationController {
                         .data(of("user", userDTO))
                         .message(String.format("User account created for user %s", request.getFirstName()))
                         .status(CREATED)
-                        .statusCode(CREATED.value())
+                        .statusCode(CREATED.value()) 
                         .build());
    
     }
@@ -122,7 +123,7 @@ public class AuthenticationController {
             return loggedInUser;
         } catch (Exception e) {
             log.error("Error authenticating user with email: " + email);
-            throw new ApiException("Api Exception has occured");
+            throw new UserUnauthorizedException("invalid email or password. Please Try again");
         }
     }
 

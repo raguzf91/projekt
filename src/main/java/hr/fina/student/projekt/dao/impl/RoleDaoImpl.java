@@ -1,5 +1,6 @@
 package hr.fina.student.projekt.dao.impl;
 
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -7,6 +8,7 @@ import org.springframework.stereotype.Repository;
 import hr.fina.student.projekt.dao.RoleDao;
 import hr.fina.student.projekt.entity.Role;
 import hr.fina.student.projekt.exceptions.ApiException;
+import hr.fina.student.projekt.exceptions.database.DatabaseException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import java.util.Map;
@@ -30,10 +32,10 @@ private final NamedParameterJdbcTemplate jdbc;
             Role role = jdbc.queryForObject(SELECT_ROLE_BY_NAME, Map.of("name", roleName), new RoleRowMapper());
             jdbc.update(ADD_ROLE_TO_USER, Map.of("userId", userId, "roleId", role.getId()));
         } catch (EmptyResultDataAccessException e) {
-            throw new RuntimeException("Error fetching role by name:" + roleName);
-        } catch (Exception e) {
+            throw new DatabaseException("No role found by name: " + roleName);
+        } catch (DataAccessException e) {
             log.error("Error adding role to the User");
-            e.getMessage();
+            throw new DatabaseException("An error occurred while adding role to the user");
         }
         
     }
@@ -51,10 +53,10 @@ private final NamedParameterJdbcTemplate jdbc;
         try {
             return jdbc.queryForObject(SELECT_ROLE_BY_USER_ID, Map.of("id", userId), new RoleRowMapper());
         } catch(EmptyResultDataAccessException e) {
-            throw new RuntimeException("No role found for user with id: " + userId);
+            throw new DatabaseException("No role found for user with id");
         } catch (Exception e) {
-            log.error(e.getMessage());
-            throw new ApiException("An error has occured");
+            log.error("Error fetching role for user");
+            throw new DatabaseException("An error occurred while adding role to the user");
         }
     }
 
@@ -78,10 +80,10 @@ private final NamedParameterJdbcTemplate jdbc;
             Role role = jdbc.queryForObject(SELECT_ROLE_BY_NAME, Map.of("name", roleName), new RoleRowMapper());
             jdbc.update(UPDATE_USER_ROLE, Map.of("roleId", role.getId(), "userId", userId));
         } catch (EmptyResultDataAccessException exception) {
-            throw new ApiException("No role found by name: " + roleName);
+            throw new DatabaseException("No role found by name: " + roleName);
         } catch (Exception exception) {
             log.error(exception.getMessage());
-            throw new ApiException("An error occurred. Please try again.");
+            throw new DatabaseException("An error occurred while updating role for the user");
         }
     }
     }
