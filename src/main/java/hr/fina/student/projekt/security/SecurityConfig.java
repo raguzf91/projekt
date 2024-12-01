@@ -49,6 +49,7 @@ public class SecurityConfig {
         .csrf(AbstractHttpConfigurer::disable) // disable csrf for stateless api
         .authorizeHttpRequests(authorize -> authorize
             .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.POST, "/api/auth/**")).permitAll()
+            .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/api/auth/**")).permitAll()
 				.requestMatchers("/user/**").hasRole("USER")       
 				.requestMatchers("/admin/**").hasRole("ADMIN")     
 				.anyRequest().authenticated()               

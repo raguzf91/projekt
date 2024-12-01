@@ -1,6 +1,7 @@
 package hr.fina.student.projekt.controller;
 
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import hr.fina.student.projekt.dao.ActivationTokenDao;
@@ -26,9 +27,12 @@ import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.Map;
 import static hr.fina.student.projekt.mapper.UserDTOMapper.fromUser;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import static java.time.LocalDateTime.now;
@@ -47,9 +51,7 @@ public class AuthenticationController {
     private final RoleService roleService;
     private final AuthenticationManager authenticationManager;
     private final JwtService tokerProvider;
-    private final ActivationTokenDao activationTokenRepository;
-    private final EmailService emailService;
-    private final String ACTIVATION_URL = "http://localhost:8080/api/auth/account-verification";
+
     @PostMapping("/register")
     public ResponseEntity<HttpResponse> register(@RequestBody @Valid RegisterRequest request) throws MessagingException {
 
@@ -77,7 +79,31 @@ public class AuthenticationController {
         //OVDJE POŠALJI ACCESS I REFRESH TOKEN
         return sendResponse(user);
     }
+
+    @GetMapping("/activate-account")
+    public ResponseEntity<HttpResponse> confirmAccount(@RequestParam String key) throws MessagingException {
+        try {
+            userService.activateAccount(key);
+            return ResponseEntity.ok(
+                HttpResponse.builder()
+                    .timeStamp(LocalDateTime.now().toString())
+                    .message("Account successfully activated")
+                    .status(HttpStatus.OK)
+                    .statusCode(HttpStatus.OK.value())
+                    .build()
+            );
+        } catch (ApiException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                HttpResponse.builder()
+                    .timeStamp(LocalDateTime.now().toString())
+                    .message(e.getMessage())
+                    .status(HttpStatus.BAD_REQUEST)
+                    .statusCode(HttpStatus.BAD_REQUEST.value())
+                    .build()
+            );
+        }
         
+    }
         
     
     
@@ -123,37 +149,14 @@ public class AuthenticationController {
         return new UserPrincipal(userService.findUserByEmail(user.getEmail()), roleService.getRoleByUserId(user.getId()));
     }
 
+   
+
     private void sendVerificationEmail(User user) throws MessagingException {
-        String activationKey = generateAndSaveActivationToken(user);
-        emailService.sendVerificationEmail(user.getFirstName(), user.getEmail(), ACTIVATION_URL, activationKey, "activateAccount");
+        userService.sendVerificationEmail(user);
     }
         
            
-    private String generateAndSaveActivationToken(User user) {
-         //generate key
-         String generatedKey = generateActivationKey(6);
-         ActivationToken activationToken = ActivationToken.builder()
-                 .key(generatedKey)
-                 .createdAt(LocalDateTime.now())
-                 .expiresAt(LocalDateTime.now().plusMinutes(15))
-                 .user(user)
-                 .build();
-        activationTokenRepository.saveActivationToken(activationToken);
-        return generatedKey;
-    }
-
-    private String generateActivationKey(int length) {
-        String characters = "0123456789";
-         StringBuilder keyBuilder = new StringBuilder();
-         SecureRandom secureRandom = new SecureRandom();
-         for (int i = 0; i < length; i++) {
-             int randomIndex = secureRandom.nextInt(characters.length()); //od 0 do 9
-             keyBuilder.append(characters.charAt(randomIndex)); // u secureRandom dodamo broj na tom random indexu
-
-         }
-
-         return keyBuilder.toString();
-    }
+    
     
 }
 

@@ -10,6 +10,6 @@ public interface    UserDao<T extends User> {
     Collection<T> findAllUsers(int pageSize); // TODO dodati paging
     T findByEmail(String email) throws DataAccessException;
     T findById(Integer id) throws DataAccessException;
-    T updateUser(Integer userId);
+    Boolean updateUser(User user);
     Boolean deleteUser(Integer userId);
 }

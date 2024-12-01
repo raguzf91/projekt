@@ -1,11 +1,15 @@
 package hr.fina.student.projekt.dao.impl;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Map;
-
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 import hr.fina.student.projekt.dao.ActivationTokenDao;
 import hr.fina.student.projekt.entity.ActivationToken;
+import hr.fina.student.projekt.exceptions.ApiException;
+import hr.fina.student.projekt.mapper.TokenRowMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -26,6 +30,38 @@ public class ActivationTokenDaoImpl implements ActivationTokenDao {
             throw new RuntimeException(e.getMessage());
         }
        
+    }
+
+
+    @Override
+    public ActivationToken findByKey(String key) {
+        final String FIND_TOKEN_BY_KEY = """
+                SELECT * FROM ActivationTokens WHERE key = :key
+                """; 
+        try {
+            ActivationToken token = jdbcTemplate.queryForObject(FIND_TOKEN_BY_KEY, Map.of("key", key), new TokenRowMapper());
+            return token;
+        } catch (EmptyResultDataAccessException exception) {
+            return null;
+        } catch (Exception e) {
+            log.error(e.getCause().toString());
+            throw new ApiException("An error has occured in verifying key");
+        } 
+    }
+
+
+    @Override
+    public Boolean updateActivationToken(ActivationToken activationToken) {
+        final String UPDATE_TOKEN = """
+                UPDATE ActivationTokens SET confirmed_at = :confirmedAt WHERE key = :key
+                """;
+        try {
+            jdbcTemplate.update(UPDATE_TOKEN, Map.of("confirmedAt", activationToken.getConfirmedAt(), "key", activationToken.getKey()));
+            return true;
+        } catch (Exception e) {
+            log.error("Error updating activation token");
+            throw new ApiException("An error has occured in updating token");
+        }
     }
     
 }

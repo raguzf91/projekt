@@ -117,28 +117,47 @@ public class UserDaoImpl implements UserDao<User>, UserDetailsService {
                 SELECT * FROM Users;
                 """;
         try {
-            List<User> users = jdbcTemplate.queryForList(SELECT_ALL_USERS, ) // TODO
+            List<User> users = jdbcTemplate.queryForList(SELECT_ALL_USERS, ) 
         } */
        return null;
         
     }
 
     @Override
-    public User updateUser(Integer userId) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'updateUser'");
+    public Boolean updateUser(User user) {
+        final String UPDATE_USER = """
+                UPDATE Users SET account_locked = :accountLocked, enabled = :enabled WHERE id = :id
+                """;
+        try {
+            jdbcTemplate.update(UPDATE_USER, Map.of("accountLocked", user.isAccountLocked() , "enabled", user.isEnabled(), "id", user.getId()));
+            return true;
+        } catch (Exception e) {
+            log.error(e.getCause().toString());
+            throw new ApiException("An error occured in updating the user");
+        }
+        
+                        
     }
 
     @Override
     public Boolean deleteUser(Integer userId) {
-        // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'deleteUser'");
     }
 
     @Override
     public User findById(Integer id) throws DataAccessException {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'findById'");
+        final String FIND_USER_BY_ID = """
+                SELECT * FROM Users WHERE id = :id
+                """;
+        try {
+            User user = jdbcTemplate.queryForObject(FIND_USER_BY_ID, Map.of("id", id), new UserRowMapper());
+            return user;
+        } catch (EmptyResultDataAccessException exception) {
+            return null;
+        } catch (Exception e) {
+            log.error(e.getCause().toString());
+            throw new ApiException("An error occured in finding an email");
+        }
     }
 
     @Override
