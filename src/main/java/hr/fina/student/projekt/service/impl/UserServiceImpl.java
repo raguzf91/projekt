@@ -69,6 +69,7 @@ public class UserServiceImpl implements UserService {
         if(userRepository.updateUser(user)) {
             savedToken.setConfirmedAt(LocalDateTime.now());
             tokenRepository.updateActivationToken(savedToken);
+            log.info("User account activated");
         }
     }
 

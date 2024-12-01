@@ -19,7 +19,6 @@ import lombok.Setter;
 public class ExceptionResponse {
     
     private Integer errorCode;
-    private String errorMessage;
     private String error;
     private Set<String> validationErrors;
     private Map<String, String> errors;

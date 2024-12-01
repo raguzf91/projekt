@@ -2,6 +2,9 @@ package hr.fina.student.projekt.enums;
 
 import org.springframework.http.HttpStatus;
 
+import lombok.Getter;
+
+@Getter
 public enum ErrorCode {
     
 
@@ -11,7 +14,10 @@ public enum ErrorCode {
     NOT_FOUND(404, "Not found", HttpStatus.NOT_FOUND),
     INTERNAL_SERVER_ERROR(500, "Internal server error", HttpStatus.INTERNAL_SERVER_ERROR),
     METHOD_NOT_ALLOWED(405, "Method not allowed", HttpStatus.METHOD_NOT_ALLOWED),
-    CONFLICT(409, "Conflict with current state of data", HttpStatus.CONFLICT);
+    CONFLICT(409, "Conflict with current state of data", HttpStatus.CONFLICT),
+    ACCOUNT_LOCKED(302, "User Account is locked", HttpStatus.FORBIDDEN),
+    BAD_CREDENTIALS(303, "Email or password is incorrect", HttpStatus.UNAUTHORIZED);
+
    
 
     private final int code;

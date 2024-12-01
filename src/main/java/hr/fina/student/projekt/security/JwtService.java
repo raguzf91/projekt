@@ -10,6 +10,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Service;
 import hr.fina.student.projekt.entity.UserPrincipal;
+import hr.fina.student.projekt.exceptions.security.JwtTokenException;
+
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -48,7 +50,8 @@ public class JwtService {
         } catch (UnsupportedJwtException e) {
             throw new UnsupportedJwtException("Invalid JWT token");
         } catch(Exception e) {
-            throw new RuntimeException("Unexpected error extracting username from token");
+            log.error("Unexpected error extracting username from token: {}", jwtToken);
+            throw new JwtTokenException("Unexpected security error");
         }
     }
 
@@ -158,7 +161,7 @@ public class JwtService {
             log.error("Error extracting authorities from token: {}", e.getMessage());
             throw new UnsupportedJwtException("Invalid JWT token");
         } catch (Exception e) {
-            log.error("Unexpected error extracting authorities from token: {}", e.getMessage());
+            log.error("Unexpected error extracting authorities from token: {}", token);
             throw new RuntimeException("Unexpected error extracting authorities from token");
         }
     }
