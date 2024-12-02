@@ -12,4 +12,5 @@ public interface    UserDao<T extends User> {
     T findById(Integer id) throws DataAccessException;
     Boolean updateUser(User user);
     Boolean deleteUser(Integer userId);
+    
 }

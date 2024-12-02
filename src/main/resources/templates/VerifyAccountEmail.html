@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Verify your account</title>
+    <link rel="stylesheet" href="../static/ActivateAccountEmailStyles.css">
+</head>
+<body>
+    <h1>Hello, <span th:text="${firstName}">[First Name]</span>!</h1>
+    <p>Detektirali smo novu prijavu u vaš račun. Molimo kliknite na link kako bi verificirali prijavu danim kodom:</p>
+    <a th:href="${verificationUrl}">Activate Account</a>
+    <p>Your activation code is: <span th:text="${activationCode}">[Verification Code]</span></p>
+</body>
+</html>

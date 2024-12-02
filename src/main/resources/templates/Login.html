@@ -1,0 +1,23 @@
+
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org">
+	<head>
+		<title>Prijava</title>
+	</head>
+	<body>
+		<h1>Molimo vas prijavite se</h1>
+		<div th:if="${param.error}">
+            <p th:text="${param.error}"></p></div>
+		<div th:if="${param.logout}">
+			You have been logged out.</div>
+		<form th:action="@{/api/auth/login}" method="post">
+			<div>
+			<input type="text" name="username" placeholder="Username"/>
+			</div>
+			<div>
+			<input type="password" name="password" placeholder="Password"/>
+			</div>
+			<input type="submit" value="Log in" />
+		</form>
+	</body>
+</html>

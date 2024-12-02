@@ -6,12 +6,13 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -44,9 +45,10 @@ public class SecurityConfig {
  * @throws Exception
  */
 @Bean
- public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+ public SecurityFilterChain securityFilterChain(HttpSecurity http)  throws Exception {
     http
-        .csrf(AbstractHttpConfigurer::disable) // disable csrf for stateless api
+        .csrf(AbstractHttpConfigurer::disable)
+        .formLogin(c -> c.loginProcessingUrl("/api/auth/login"))
         .authorizeHttpRequests(authorize -> authorize
             .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.POST, "/api/auth/**")).permitAll()
             .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/api/auth/**")).permitAll()
@@ -62,6 +64,10 @@ public class SecurityConfig {
     return http.build();
  }
 
+    
+
+   
+
  @Bean
  @Lazy
  public AuthenticationProvider authenticationProvider() {
@@ -75,6 +81,8 @@ public class SecurityConfig {
  public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
      return configuration.getAuthenticationManager();
  }
+
+
 
     
 

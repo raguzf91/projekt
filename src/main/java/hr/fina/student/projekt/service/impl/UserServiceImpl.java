@@ -1,11 +1,12 @@
 package hr.fina.student.projekt.service.impl;
 
-import hr.fina.student.projekt.dao.ActivationTokenDao;
+import hr.fina.student.projekt.dao.TokenDao;
 import hr.fina.student.projekt.dao.RoleDao;
 import hr.fina.student.projekt.dao.UserDao;
-import hr.fina.student.projekt.entity.ActivationToken;
+import hr.fina.student.projekt.entity.Token;
 import hr.fina.student.projekt.entity.User;
 import hr.fina.student.projekt.exceptions.ApiException;
+import hr.fina.student.projekt.exceptions.key.AccountAlreadyConfirmedException;
 import hr.fina.student.projekt.exceptions.key.InvalidKeyException;
 import hr.fina.student.projekt.exceptions.key.KeyExpiredException;
 import hr.fina.student.projekt.dto.UserDTO;
@@ -27,8 +28,8 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
     private final UserDao<User> userRepository;
-    private final ActivationTokenDao tokenRepository;
-    private final ActivationTokenDao activationTokenRepository;
+    private final TokenDao tokenRepository;
+    private final TokenDao activationTokenRepository;
     private final EmailService emailService;
     private final String ACTIVATION_URL = "http://localhost:8080/api/auth/account-verification";
 
@@ -48,19 +49,28 @@ public class UserServiceImpl implements UserService {
     }
     
     public void activateAccount(String key) throws MessagingException {
-        ActivationToken savedToken;
+        Token savedToken;
+
+        
         try {
+
            savedToken = tokenRepository.findByKey(key);
+
         } catch (Exception e) {
             log.error("Error finding token");
             throw new InvalidKeyException("Key is incorrect. Please enter a valid key");
+        }
+
+        if(savedToken.getConfirmedAt() != null) {
+            log.error("account already confirmed");
+            throw new AccountAlreadyConfirmedException("Account is already confirmed");
         }
 
         User user = findUserById(savedToken.getUser().getId());
         
         if(LocalDateTime.now().isAfter(savedToken.getExpiresAt())) {
                log.error("Token expired");
-               sendVerificationEmail(user);
+               sendEmail(user, ACTIVATION_URL, "activateAccount");
                throw new KeyExpiredException("Key has expired. Please check your email for a new key");
             }
         user.setEnabled(true);
@@ -73,15 +83,15 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-     public void sendVerificationEmail(User user) throws MessagingException {
+     public void sendEmail(User user, String url, String emailType ) throws MessagingException {
         String activationKey = generateAndSaveActivationToken(user);
-        emailService.sendVerificationEmail(user.getFirstName(), user.getEmail(), ACTIVATION_URL, activationKey, "activateAccount");
+        emailService.sendEmail(user.getFirstName(), user.getEmail(), url, activationKey, emailType);
     }
 
     private String generateAndSaveActivationToken(User user) {
          //generate key
          String generatedKey = generateActivationKey(6);
-         ActivationToken activationToken = ActivationToken.builder()
+         Token activationToken = Token.builder()
                  .key(generatedKey)
                  .createdAt(LocalDateTime.now())
                  .expiresAt(LocalDateTime.now().plusMinutes(15))
@@ -102,6 +112,38 @@ public class UserServiceImpl implements UserService {
          }
 
          return keyBuilder.toString();
+    }
+
+    @Override
+    public User verifyCode(String email, String code) throws InvalidKeyException {
+        try {
+            Token token = tokenRepository.findByKey(code);
+            if(token == null || token.getConfirmedAt() != null) {
+                throw new InvalidKeyException("Key is incorrect. Please enter a valid key");
+
+            }
+
+            User userByEmail = findUserByEmail(email);
+            User userByCode = tokenRepository.findUserByKey(code);
+            
+            if(userByCode.getEmail().equalsIgnoreCase(userByEmail.getEmail())) {
+                if(LocalDateTime.now().isAfter(token.getExpiresAt())) {
+                    sendEmail(userByCode, code, email);
+                } else {
+                    token.setConfirmedAt(LocalDateTime.now());
+                    tokenRepository.updateActivationToken(token);
+                    return userByCode;
+                }
+    
+            } else {
+                throw new InvalidKeyException("Key is incorrect. Please enter a valid key");
+            }
+            
+        } catch (Exception e) {
+            log.error("Error verifying code" + e.getCause().toString());
+            throw new InvalidKeyException("Key is incorrect. Please enter a valid key");
+        }
+        return null;
     }
 
     

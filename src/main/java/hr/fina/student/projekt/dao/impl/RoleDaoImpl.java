@@ -7,7 +7,6 @@ import org.springframework.stereotype.Repository;
 
 import hr.fina.student.projekt.dao.RoleDao;
 import hr.fina.student.projekt.entity.Role;
-import hr.fina.student.projekt.exceptions.ApiException;
 import hr.fina.student.projekt.exceptions.database.DatabaseException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

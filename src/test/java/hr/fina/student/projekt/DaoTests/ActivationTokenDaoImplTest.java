@@ -20,8 +20,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
-import hr.fina.student.projekt.dao.impl.ActivationTokenDaoImpl;
-import hr.fina.student.projekt.entity.ActivationToken;
+import hr.fina.student.projekt.dao.impl.TokenDaoImpl;
+import hr.fina.student.projekt.entity.Token;
 import hr.fina.student.projekt.entity.User;
 
 public class ActivationTokenDaoImplTest {
@@ -29,7 +29,7 @@ public class ActivationTokenDaoImplTest {
     private NamedParameterJdbcTemplate jdbcTemplate;
 
     @InjectMocks
-    private ActivationTokenDaoImpl activationTokenDao;
+    private TokenDaoImpl activationTokenDao;
 
     @BeforeEach
     public void setUp() {
@@ -38,7 +38,7 @@ public class ActivationTokenDaoImplTest {
 
     @Test
     public void testSaveActivationToken_Success() {
-        ActivationToken token = new ActivationToken();
+        Token token = new Token();
         token.setKey("testKey");
         User user = new User();
         user.setId(1);
@@ -54,7 +54,7 @@ public class ActivationTokenDaoImplTest {
 
     @Test
     public void testSaveActivationToken_Exception() {
-        ActivationToken token = new ActivationToken();
+        Token token = new Token();
         token.setKey("testKey");
         User user = new User();
         user.setId(1);

@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import hr.fina.student.projekt.enums.ErrorCode;
+import hr.fina.student.projekt.exceptions.key.AccountAlreadyConfirmedException;
 import hr.fina.student.projekt.exceptions.user.AccountLockedException;
 import hr.fina.student.projekt.exceptions.user.UserAlreadyExistsException;
 import hr.fina.student.projekt.exceptions.user.UserUnauthorizedException;
@@ -116,5 +117,19 @@ public class GlobalExceptionHandler {
                     .build()
                 );
     }
+
+    @ExceptionHandler(AccountAlreadyConfirmedException.class)
+    public ResponseEntity<ExceptionResponse> handleException(AccountAlreadyConfirmedException ex) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(
+                    ExceptionResponse.builder()
+                    .errorCode(ex.getErrorCode().getCode())
+                    .error(ex.getMessage())
+                    .build()
+                );
+    }
+
+    
     
 }

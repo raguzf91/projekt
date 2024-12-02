@@ -3,10 +3,9 @@ package hr.fina.student.projekt.controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.view.RedirectView;
 
-import hr.fina.student.projekt.dao.ActivationTokenDao;
 import hr.fina.student.projekt.dto.UserDTO;
-import hr.fina.student.projekt.entity.ActivationToken;
 import hr.fina.student.projekt.entity.User;
 import hr.fina.student.projekt.entity.UserPrincipal;
 import hr.fina.student.projekt.exceptions.ApiException;
@@ -26,12 +25,13 @@ import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.Map;
 import static hr.fina.student.projekt.mapper.UserDTOMapper.fromUser;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import static java.time.LocalDateTime.now;
@@ -57,9 +57,8 @@ public class AuthenticationController {
         User user = userService.createUser(registerRequestToUser(request));
 
         // send verification mail
-        sendVerificationEmail(user);
-        // when verified enable user account -> user.setEnabled(true)
-        //when enabled unlock account
+        //TODO url je link na koji će activate account button u emailu redirectati korisnika - STAVI GA U FINALNU VARIJABLU
+        sendEmail(user, "http://localhost:8080/api/auth/activate-account}" , "activateAccount");
         UserDTO userDTO = fromUser(user, roleService.getRoleByUserId(user.getId()));
          return ResponseEntity.created(getUri()).body(
                 HttpResponse.builder()
@@ -73,10 +72,33 @@ public class AuthenticationController {
     }
 
     @PostMapping("/login") 
-    public ResponseEntity<HttpResponse> login(@RequestBody @Valid LoginRequest loginRequest) {
+    public RedirectView login(@RequestBody @Valid LoginRequest loginRequest) throws MessagingException {
         UserPrincipal user = authenticate(loginRequest.getEmail(), loginRequest.getPassword());
+        sendEmail(user.getUser(), "http://localhost:8080/api/auth/verify/code/" + user.getUser().getEmail() + "/", "verifyAccount");
+        
+        String redirectUrl = "/verifyAccount.html?email=" + user.getUser().getEmail();
+        return new RedirectView(redirectUrl);
+        }
+        
+    
+        
+    @GetMapping("/verify/code/{email}/{code}")
+    public ResponseEntity<HttpResponse> verifyCode(@PathVariable("email") String email, @PathVariable("code") String code) {
+        User user = userService.findUserByEmail(email);
+        UserDTO userDTO = fromUser(user, roleService.getRoleByUserId(user.getId()));
+        userService.verifyCode(email, code);
+        return ResponseEntity.ok().body(
+            HttpResponse.builder()
+                .timeStamp(now().toString())
+                .data(Map.of("user", userDTO, "access_token", tokerProvider.createAccessToken(getUserPrincipal(user)), 
+                             "refresh_token", tokerProvider.createRefreshToken(getUserPrincipal(user)))) 
+                .message("Login Success")
+                .status(OK)
+                .statusCode(OK.value())
+                .build()     
+        );
         //OVDJE POŠALJI ACCESS I REFRESH TOKEN
-        return sendResponse(user);
+        
     }
 
     @GetMapping("/activate-account")
@@ -101,8 +123,11 @@ public class AuthenticationController {
                     .build()
             );
         }
+
+        
         
     }
+
         
     
     
@@ -121,7 +146,7 @@ public class AuthenticationController {
             return loggedInUser;
         } catch (Exception e) {
             log.error("Error authenticating user with email: " + email);
-            throw new UserUnauthorizedException("invalid email or password. Please Try again");
+           throw new BadCredentialsException("Pogrešni email ili lozinka");
         }
     }
 
@@ -150,8 +175,8 @@ public class AuthenticationController {
 
    
 
-    private void sendVerificationEmail(User user) throws MessagingException {
-        userService.sendVerificationEmail(user);
+    private void sendEmail(User user, String url, String emailType) throws MessagingException {
+        userService.sendEmail(user, url, emailType);
     }
         
            

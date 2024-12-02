@@ -4,5 +4,5 @@ import hr.fina.student.projekt.enums.VerificationType;
 import jakarta.mail.MessagingException;
 
 public interface EmailService {
-    void sendVerificationEmail(String firstName, String email,  String verificationUrl, String activationCode, String verificationType) throws MessagingException;  
+    void sendEmail(String firstName, String email,  String verificationUrl, String activationCode, String verificationType) throws MessagingException;  
 } 

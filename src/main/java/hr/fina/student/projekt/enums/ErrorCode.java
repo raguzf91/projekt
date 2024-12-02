@@ -16,8 +16,8 @@ public enum ErrorCode {
     METHOD_NOT_ALLOWED(405, "Method not allowed", HttpStatus.METHOD_NOT_ALLOWED),
     CONFLICT(409, "Conflict with current state of data", HttpStatus.CONFLICT),
     ACCOUNT_LOCKED(302, "User Account is locked", HttpStatus.FORBIDDEN),
-    BAD_CREDENTIALS(303, "Email or password is incorrect", HttpStatus.UNAUTHORIZED);
-
+    BAD_CREDENTIALS(303, "Email or password is incorrect", HttpStatus.UNAUTHORIZED),
+    ACCOUNT_ALREADY_CONFIRMED(304, "Account is already confirmed", HttpStatus.BAD_REQUEST);
    
 
     private final int code;

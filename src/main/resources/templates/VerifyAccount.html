@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org">
+<head>
+    <title>Verify Account</title>
+</head>
+<body>
+    <h1>Verify Your Account</h1>
+    <form th:action="@{/api/auth/verify/code}" method="get">
+        <input type="hidden" name="email" th:value="${param.email}" />
+        <div>
+            <label for="code">Verification Code:</label>
+            <input type="text" id="code" name="code" required />
+        </div>
+        <button type="submit">Verify</button>
+    </form>
+</body>
+</html>

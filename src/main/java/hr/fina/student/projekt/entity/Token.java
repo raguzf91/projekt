@@ -13,7 +13,7 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-public class ActivationToken extends BaseEntity {
+public class Token extends BaseEntity {
     private String key;
     private LocalDateTime createdAt;
     private LocalDateTime expiresAt;

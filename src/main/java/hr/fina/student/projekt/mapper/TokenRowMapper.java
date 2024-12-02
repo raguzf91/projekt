@@ -4,15 +4,15 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import org.springframework.jdbc.core.RowMapper;
 
-import hr.fina.student.projekt.entity.ActivationToken;
+import hr.fina.student.projekt.entity.Token;
 import hr.fina.student.projekt.entity.User;
 
-public class TokenRowMapper implements RowMapper<ActivationToken> {
+public class TokenRowMapper implements RowMapper<Token> {
     
 
     @Override
-    public ActivationToken mapRow(ResultSet rs, int rowNum) throws SQLException {
-        return ActivationToken.builder()
+    public Token mapRow(ResultSet rs, int rowNum) throws SQLException {
+        return Token.builder()
         .id(rs.getInt("id"))
         .key(rs.getString("key"))
         .user(User.builder().id(rs.getInt("user_id")).build())

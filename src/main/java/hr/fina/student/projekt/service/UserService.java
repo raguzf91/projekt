@@ -8,5 +8,6 @@ public interface UserService {
     User findUserByEmail(String email);
     User findUserById(Integer id);
     void activateAccount(String key) throws MessagingException;
-    void sendVerificationEmail(User user) throws MessagingException;
+    void sendEmail(User user, String url, String  verificationType) throws MessagingException;
+    User verifyCode(String email, String code);
 }

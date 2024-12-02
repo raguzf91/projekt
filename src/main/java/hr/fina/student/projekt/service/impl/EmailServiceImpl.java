@@ -30,13 +30,22 @@ public class EmailServiceImpl implements EmailService {
     //send asynchronously so user doesn't have to wait for email to be sent
     @Override
     @Async
-    public void sendVerificationEmail(String firstName, String userEmail,  String verificationUrl,
+    public void sendEmail(String firstName, String userEmail,  String verificationUrl,
      String activationCode, String verificationType) throws MessagingException {
-        String templateName;
-        if(verificationType.equals(VerificationType.ACTIVATE_ACCOUNT.getName())) {
-            templateName = "ActivateAccount";
-        } else {
-            templateName = "ResetPassword";
+        String templateName = null;
+
+        switch (verificationType) {
+            case "activateAccount":
+                templateName = "ActivateAccountEmail";
+                break;
+            case "resetPassword":
+                templateName = "ResetPasswordEmail";
+                break;
+            case "verifyAccount":
+                templateName = "VerifyAccountEmail";
+                break;
+            default:
+                break;
         }
 
         try {
