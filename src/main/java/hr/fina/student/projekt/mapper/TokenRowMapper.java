@@ -20,6 +20,7 @@ public class TokenRowMapper implements RowMapper<Token> {
         .expiresAt(rs.getTimestamp("expires_at").toLocalDateTime())
         .updatedAt(rs.getTimestamp("updated_at").toLocalDateTime())
         .confirmedAt(rs.getTimestamp("confirmed_at") != null ? rs.getTimestamp("confirmed_at").toLocalDateTime() : null)
+        .type(rs.getString("type")) 
         .build();
     }
 }

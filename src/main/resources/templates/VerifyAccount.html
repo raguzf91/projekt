@@ -6,7 +6,7 @@
 <body>
     <h1>Verify Your Account</h1>
     <form th:action="@{/api/auth/verify/code}" method="get">
-        <input type="hidden" name="email" th:value="${param.email}" />
+        <input type="hidden" name="email" th:value="${email}" />
         <div>
             <label for="code">Verification Code:</label>
             <input type="text" id="code" name="code" required />

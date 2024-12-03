@@ -10,14 +10,47 @@
             <p th:text="${param.error}"></p></div>
 		<div th:if="${param.logout}">
 			You have been logged out.</div>
-		<form th:action="@{/api/auth/login}" method="post">
+		<form action="/api/auth/login" id ="loginForm">
 			<div>
-			<input type="text" name="username" placeholder="Username"/>
+			<label for="email">Email</label>	
+			<input type="text" name="email" placeholder="Email"/>
 			</div>
 			<div>
+			<label for="password">Password</label>
 			<input type="password" name="password" placeholder="Password"/>
 			</div>
-			<input type="submit" value="Log in" />
+			<button type="button" onclick="submitForm()">Login</button>
 		</form>
+		<script>
+            function submitForm() {
+                const form = document.getElementById('loginForm');
+                const formData = new FormData(form);
+                const jsonData = {};
+                formData.forEach((value, key) => {
+                    jsonData[key] = value;
+                });
+    
+                fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(jsonData)
+                })
+                .then(response => response.json())
+				.then(text => {
+                console.log('Response Text:', text); // Log the response text
+                try {
+                    const data = JSON.parse(text); // Attempt to parse the text as JSON
+                    console.log('Success:', data);
+                } catch (error) {
+                    console.error('Error parsing JSON:', error);
+                }
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+            }
+        </script>
 	</body>
 </html>

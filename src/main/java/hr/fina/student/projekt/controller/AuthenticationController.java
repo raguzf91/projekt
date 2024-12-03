@@ -21,7 +21,11 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import static org.springframework.security.authentication.UsernamePasswordAuthenticationToken.unauthenticated;
+
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.Map;
 import static hr.fina.student.projekt.mapper.UserDTOMapper.fromUser;
@@ -30,6 +34,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -72,21 +77,28 @@ public class AuthenticationController {
     }
 
     @PostMapping("/login") 
-    public RedirectView login(@RequestBody @Valid LoginRequest loginRequest) throws MessagingException {
+    public RedirectView login(@RequestBody @Valid LoginRequest loginRequest) throws MessagingException, UnsupportedEncodingException {
         UserPrincipal user = authenticate(loginRequest.getEmail(), loginRequest.getPassword());
         sendEmail(user.getUser(), "http://localhost:8080/api/auth/verify/code/" + user.getUser().getEmail() + "/", "verifyAccount");
         
-        String redirectUrl = "/verifyAccount.html?email=" + user.getUser().getEmail();
+        String redirectUrl = "/VerifyAccount.html?email=" + URLEncoder.encode(user.getUser().getEmail(), StandardCharsets.UTF_8.toString());
         return new RedirectView(redirectUrl);
+        }
+        
+        @GetMapping("/verifyAccount")
+        public String verifyAccountPage(@RequestParam String email, Model model) {
+            model.addAttribute("email", email);
+            return "VerifyAccount";
         }
         
     
         
     @GetMapping("/verify/code/{email}/{code}")
     public ResponseEntity<HttpResponse> verifyCode(@PathVariable("email") String email, @PathVariable("code") String code) {
+        
         User user = userService.findUserByEmail(email);
         UserDTO userDTO = fromUser(user, roleService.getRoleByUserId(user.getId()));
-        userService.verifyCode(email, code);
+        userService.verifyAccount(email, code);
         return ResponseEntity.ok().body(
             HttpResponse.builder()
                 .timeStamp(now().toString())
@@ -102,9 +114,9 @@ public class AuthenticationController {
     }
 
     @GetMapping("/activate-account")
-    public ResponseEntity<HttpResponse> confirmAccount(@RequestParam String key) throws MessagingException {
+    public ResponseEntity<HttpResponse> confirmAccount(@RequestParam String email, @RequestParam String key) throws MessagingException {
         try {
-            userService.activateAccount(key);
+            userService.activateAccount(email, key);
             return ResponseEntity.ok(
                 HttpResponse.builder()
                     .timeStamp(LocalDateTime.now().toString())

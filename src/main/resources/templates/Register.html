@@ -1,0 +1,67 @@
+
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org">
+	<head>
+		<title>Registracija</title>
+	</head>
+	<body>
+		<h1>Molimo vas Registrirajte se</h1>
+		<div th:if="${param.error}">
+            <p th:text="${param.error}"></p></div>
+		<div th:if="${param.logout}">
+			You have been logged out.</div>
+		<form  id="registerForm">
+            <div>
+                <label for="firstName">First Name</label>
+                <input type="text" name="firstName" placeholder="First Name"/>
+            </div>
+            <div>
+                <label for="lastName">Last Name</label>
+                <input type="text" name="lastName" placeholder="Last Name"/>
+            </div>
+			<div>
+                <label for="email">Email</label>
+			    <input type="text" name="email" placeholder="Email"/>
+			</div>
+			<div>
+                <label for="password">Password</label>
+			    <input type="password" name="password" placeholder="Password"/>
+			</div>
+            <div>
+                <label for="dateOfBirth">Date of Birth</label>
+                <input type="date" name="dateOfBirth" placeholder="Date Of Birth" value="2018-07-22"/>
+            </div>
+            <div>
+                <label for="phoneNumber">Phone Number</label>
+                <input type="text" name="phoneNumber" placeholder="Phone Number"/>
+            </div>
+            
+			<button type="button" onclick="submitForm()">Register</button>
+		</form>
+        <script>
+            function submitForm() {
+                const form = document.getElementById('registerForm');
+                const formData = new FormData(form);
+                const jsonData = {};
+                formData.forEach((value, key) => {
+                    jsonData[key] = value;
+                });
+    
+                fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(jsonData)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Success:', data);
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                });
+            }
+        </script>
+	</body>
+</html>

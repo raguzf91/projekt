@@ -15,10 +15,12 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import lombok.RequiredArgsConstructor;
 
@@ -32,7 +34,7 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final BCryptPasswordEncoder encoder;
     private final UserDetailsService userDetailsService;
-    
+    private final LogoutHandler logoutHandler;
     
 /**
  * 
@@ -48,19 +50,29 @@ public class SecurityConfig {
  public SecurityFilterChain securityFilterChain(HttpSecurity http)  throws Exception {
     http
         .csrf(AbstractHttpConfigurer::disable)
-        .formLogin(c -> c.loginProcessingUrl("/api/auth/login"))
         .authorizeHttpRequests(authorize -> authorize
             .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.POST, "/api/auth/**")).permitAll()
             .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/api/auth/**")).permitAll()
-				.requestMatchers("/user/**").hasRole("USER")       
-				.requestMatchers("/admin/**").hasRole("ADMIN")     
-				.anyRequest().authenticated()               
+            .requestMatchers("/login").permitAll()
+            .requestMatchers("/register").permitAll()
+			.requestMatchers("/user/**").hasRole("USER")       
+			.requestMatchers("/admin/**").hasRole("ADMIN")     
+			.anyRequest().authenticated()               
 			)
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authenticationProvider(authenticationProvider())
-            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
-             
-        
+            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+            .logout(Customizer.withDefaults())
+            .logout(logout -> logout
+                .logoutUrl("/api/auth/logout")
+                .addLogoutHandler(logoutHandler)
+                .logoutSuccessHandler(
+                    (request, response, authentication) -> {
+                        SecurityContextHolder.clearContext();
+                        response.setStatus(200);
+                    }
+                )
+            );
     return http.build();
  }
 

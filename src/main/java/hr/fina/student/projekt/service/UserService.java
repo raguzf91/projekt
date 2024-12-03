@@ -7,7 +7,7 @@ public interface UserService {
     User createUser(User user);
     User findUserByEmail(String email);
     User findUserById(Integer id);
-    void activateAccount(String key) throws MessagingException;
+    void activateAccount(String email, String key) throws MessagingException;
     void sendEmail(User user, String url, String  verificationType) throws MessagingException;
-    User verifyCode(String email, String code);
+    void verifyAccount(String email, String code);
 }

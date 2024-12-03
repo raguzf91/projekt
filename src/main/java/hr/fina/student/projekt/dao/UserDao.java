@@ -1,8 +1,11 @@
 package hr.fina.student.projekt.dao;
 
 import org.springframework.dao.DataAccessException;
+
+import hr.fina.student.projekt.entity.Token;
 import hr.fina.student.projekt.entity.User;
 import java.util.Collection;
+import java.util.Set;
 
 public interface    UserDao<T extends User> {
     

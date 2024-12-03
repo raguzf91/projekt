@@ -9,7 +9,6 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Repository;
 import hr.fina.student.projekt.dao.UserDao;
-import hr.fina.student.projekt.dto.UserDTO;
 import hr.fina.student.projekt.entity.User;
 import hr.fina.student.projekt.entity.UserPrincipal;
 import lombok.RequiredArgsConstructor;
@@ -47,7 +46,7 @@ public class UserDaoImpl implements UserDao<User>, UserDetailsService {
        }
        // save new user
        try {
-        log.info("Saving user: {}");
+        log.info("Saving user: {"+ user.getEmail()+"}");
         KeyHolder holder = new GeneratedKeyHolder();
         SqlParameterSource params = getSqlParameterSource(user);
         user.setEnabled(false);
@@ -62,7 +61,7 @@ public class UserDaoImpl implements UserDao<User>, UserDetailsService {
         roleRepository.addRoleToUser(user.getId(), RoleType.ROLE_USER.name());                              
            return user;
        } catch (Exception e) {
-        log.error("Couldn't save user");
+        log.error("Couldn't save user: " + e.getMessage());
         throw new DatabaseException("An error has occured. Please try again");
        }
         // TODO: handle exception

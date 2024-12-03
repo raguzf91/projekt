@@ -18,5 +18,6 @@ public class Token extends BaseEntity {
     private LocalDateTime createdAt;
     private LocalDateTime expiresAt;
     private LocalDateTime confirmedAt;
+    private String type;
     private User user;
 }
