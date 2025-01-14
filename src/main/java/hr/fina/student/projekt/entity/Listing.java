@@ -16,7 +16,7 @@ import lombok.experimental.SuperBuilder;
 public class Listing extends BaseEntity {
     
     private String title;
-    private String desctiotion;
+    private String description;
     private Double price;
     private Double rating;
     private boolean refundable;
@@ -29,6 +29,7 @@ public class Listing extends BaseEntity {
     private Location location;
     private List<Rule> rules;
     private Set<Amenity> amenities;
+    private String category;
 
    
 

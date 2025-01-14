@@ -1,5 +1,6 @@
 package hr.fina.student.projekt.service.impl;
 
+import hr.fina.student.projekt.security.JwtService;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.stereotype.Service;
@@ -13,7 +14,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class LogoutService implements LogoutHandler{
 
-    
+    private final JwtService jwtService;
+
     @Override
     public void logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
         //extract the jwt token from the Auth header
@@ -25,7 +27,8 @@ public class LogoutService implements LogoutHandler{
         }
         
         jwtToken = jwtService.getJwtFromRequest(authHeader);
-    }
+    } catch(Exception e) {
+        return;
     
     }
-}
+}}
