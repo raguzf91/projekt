@@ -23,7 +23,7 @@ public class Listing extends BaseEntity {
     private Integer numberOfBedrooms;
     private Integer numberOfBeds;
     private User user;
-    private Set<Photo> photos;
+    private List<Photo> photos;
     private Set<Reservation> reservations;
     private Set<Review> reviews;
     private Location location;

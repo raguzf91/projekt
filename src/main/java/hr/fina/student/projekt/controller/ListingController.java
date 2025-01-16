@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -23,12 +24,13 @@ import static org.springframework.http.HttpStatus.OK;
 @RequestMapping("/api/listing")
 @RequiredArgsConstructor
 @Slf4j
+@CrossOrigin("*")
 public class ListingController {
 
     public final ListingService listingService;
     @GetMapping("/all")
     public ResponseEntity<HttpResponse> getAllListings() {
-        log.info("Fetching all listings");
+
         List<Listing> listings = listingService.getAllListings();
         return ResponseEntity.ok().body(
                 HttpResponse.builder()

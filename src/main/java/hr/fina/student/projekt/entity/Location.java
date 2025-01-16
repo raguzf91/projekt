@@ -13,4 +13,7 @@ public class Location extends BaseEntity{
     private String city;
     private String state;
     private String zipcode;
+    private String country;
+    private Double latitude;
+    private Double longitude;
 }

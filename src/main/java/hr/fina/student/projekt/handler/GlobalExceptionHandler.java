@@ -3,6 +3,7 @@ package hr.fina.student.projekt.handler;
 import java.util.HashSet;
 import java.util.Set;
 
+import hr.fina.student.projekt.exceptions.database.DatabaseException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -36,6 +37,19 @@ public class GlobalExceptionHandler {
                     .build()
                 );
         
+    }
+
+    @ExceptionHandler(DatabaseException.class)
+    public ResponseEntity<ExceptionResponse> handleException(DatabaseException ex) {
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(
+                        ExceptionResponse.builder()
+                                .errorCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                                .error(ex.getMessage())
+                                .build()
+                );
+
     }
 
     @ExceptionHandler(UserUnauthorizedException.class)
@@ -117,6 +131,8 @@ public class GlobalExceptionHandler {
                     .build()
                 );
     }
+
+
 
     @ExceptionHandler(AccountAlreadyConfirmedException.class)
     public ResponseEntity<ExceptionResponse> handleException(AccountAlreadyConfirmedException ex) {

@@ -50,9 +50,12 @@ public class SecurityConfig {
  public SecurityFilterChain securityFilterChain(HttpSecurity http)  throws Exception {
     http
         .csrf(AbstractHttpConfigurer::disable)
+            .cors(Customizer.withDefaults())
         .authorizeHttpRequests(authorize -> authorize
             .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.POST, "/api/auth/**")).permitAll()
             .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/api/auth/**")).permitAll()
+            .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/api/listing/**")).permitAll()
+                        .requestMatchers(HttpMethod.OPTIONS,"/**").permitAll()
             .requestMatchers("/login").permitAll()
             .requestMatchers("/register").permitAll()
 			.requestMatchers("/user/**").hasRole("USER")       

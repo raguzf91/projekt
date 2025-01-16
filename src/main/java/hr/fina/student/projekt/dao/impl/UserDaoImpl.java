@@ -137,6 +137,8 @@ public class UserDaoImpl implements UserDao<User>, UserDetailsService {
         throw new UnsupportedOperationException("Unimplemented method 'deleteUser'");
     }
 
+
+
     @Override
     public User findById(Integer id) throws DataAccessException {
         final String FIND_USER_BY_ID = """
@@ -149,7 +151,7 @@ public class UserDaoImpl implements UserDao<User>, UserDetailsService {
         } catch (EmptyResultDataAccessException exception) {
             return null;
         } catch (Exception e) {
-            log.error("Error finding user by id");
+            log.error("Error finding user by id" + e.getCause());
             throw new DatabaseException("An error occured in finding the user by id");
         }
     }

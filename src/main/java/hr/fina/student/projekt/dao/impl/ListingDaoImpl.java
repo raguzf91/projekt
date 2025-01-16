@@ -1,33 +1,89 @@
 package hr.fina.student.projekt.dao.impl;
 
 import hr.fina.student.projekt.dao.ListingDao;
+import hr.fina.student.projekt.dao.LocationDao;
+import hr.fina.student.projekt.dao.UserDao;
 import hr.fina.student.projekt.entity.Listing;
+import hr.fina.student.projekt.entity.Location;
+import hr.fina.student.projekt.entity.Photo;
+import hr.fina.student.projekt.entity.User;
 import hr.fina.student.projekt.exceptions.database.DatabaseException;
 import hr.fina.student.projekt.mapper.ListingRowMapper;
+import hr.fina.student.projekt.mapper.PhotoRowMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Slf4j
 @RequiredArgsConstructor
 @Repository
 public class ListingDaoImpl implements ListingDao {
     private final NamedParameterJdbcTemplate jdbc;
-
+    private final LocationDao locationDao;
+    private final UserDao userDao;
 
     public List<Listing> findAllListings() {
         try {
             log.info("Fetching all listings");
             final String FIND_ALL_LISTINGS = "SELECT * FROM listings";
             List<Listing> listings = jdbc.query(FIND_ALL_LISTINGS, new ListingRowMapper());
-            return List.of();
+
+            for(Listing listing : listings) {
+                if(listing.getLocation() == null) {
+                    listing.setLocation(locationDao.findLocationByListingId(listing.getId()));
+                }
+                if(listing.getUser() == null) {
+                    listing.setUser(findUserByListingId(listing));
+                }
+                if(listing.getPhotos() == null) {
+                    listing.setPhotos(findPhotosByListingId(listing));
+                }
+            }
+
+            return listings;
         } catch (Exception e) {
             log.error("Error fetching all listings", e.getCause());
             throw new DatabaseException("An error has occured in fetching all listings");
         }
 
+    }
+
+
+    private User findUserByListingId(Listing listing) {
+        try{
+            final String FIND_USER_BY_LISTING_ID = """
+                        SELECT user_id FROM listings WHERE id = :listingId
+                    """;
+            Integer listingId = listing.getId();
+            Integer userId = jdbc.queryForObject(FIND_USER_BY_LISTING_ID, Map.of("listingId", listingId), Integer.class);
+            return userDao.findById(userId);
+        } catch (Exception e) {
+            log.error("Error fetching user for listing id {}", listing.getId(), e.getCause());
+            throw new DatabaseException("An error has occurred in fetching user for listing id: " + listing.getId());
+        }
+    }
+
+    private List<Photo> findPhotosByListingId(Listing listing) {
+        try{
+            final String FIND_PHOTO_BY_LISTING_ID = """
+                        SELECT * FROM photos WHERE listing_id = :listingId
+                    """;
+            Integer listingId = listing.getId();
+            return jdbc.query(FIND_PHOTO_BY_LISTING_ID, Map.of("listingId", listingId), new PhotoRowMapper());
+        } catch (Exception e) {
+            log.error("Error fetching user for listing id {}", listing.getId(), e.getCause());
+            throw new DatabaseException("An error has occurred in fetching user for listing id: " + listing.getId());
+        }
+    }
+
+    @Override
+    public Location findLocationByListingId(int listingId) {
+        return null;
     }
 }
