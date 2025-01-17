@@ -9,6 +9,7 @@ import hr.fina.student.projekt.entity.Photo;
 import hr.fina.student.projekt.entity.User;
 import hr.fina.student.projekt.exceptions.database.DatabaseException;
 import hr.fina.student.projekt.mapper.ListingRowMapper;
+import hr.fina.student.projekt.mapper.ListingSecondRowMapper;
 import hr.fina.student.projekt.mapper.PhotoRowMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,8 +32,8 @@ public class ListingDaoImpl implements ListingDao {
     public List<Listing> findAllListings() {
         try {
             log.info("Fetching all listings");
-            final String FIND_ALL_LISTINGS = "SELECT * FROM listings";
-            List<Listing> listings = jdbc.query(FIND_ALL_LISTINGS, new ListingRowMapper());
+            final String FIND_ALL_LISTINGS = "SELECT id, description, title, rating, user_id, price FROM listings";
+            List<Listing> listings = jdbc.query(FIND_ALL_LISTINGS, new ListingSecondRowMapper());
 
             for(Listing listing : listings) {
                 if(listing.getLocation() == null) {
@@ -82,8 +83,47 @@ public class ListingDaoImpl implements ListingDao {
         }
     }
 
+
+    private Location findLocationByListingId(Listing listing) {
+        return locationDao.findLocationByListingId(listing.getId());
+    }
+
     @Override
-    public Location findLocationByListingId(int listingId) {
-        return null;
+    public Listing findListing(Integer id) {
+        try{
+            log.info("Fetching listing by id {}", id);
+            final String FIND_LISTING_BY_ID = """
+                SELECT * FROM listings WHERE id = :id
+            """;
+            Listing listing = jdbc.queryForObject(FIND_LISTING_BY_ID, Map.of("id", id), new ListingRowMapper());
+            listing.setLocation(findLocationByListingId(listing));
+            listing.setUser(findUserByListingId(listing));
+            listing.setPhotos(findPhotosByListingId(listing));
+            return listing;
+        } catch (Exception e) {
+            log.error("Error fetching listing by id {}", id, e.getCause());
+            throw new DatabaseException("An error has occurred in fetching listing by id: " + id);
+        }
+
+    }
+
+    @Override
+    public List<Listing> findListingByCategory(String category) {
+        try{
+            log.info("Fetching listings by category {}", category);
+            final String FIND_LISTING_BY_CATEGORY = """
+                SELECT id, description, title, rating, user_id, price FROM listings WHERE category = :category;
+            """;
+            List<Listing> listings = jdbc.query(FIND_LISTING_BY_CATEGORY, Map.of("category", category), new ListingSecondRowMapper());
+            for(Listing listing : listings) {
+                listing.setLocation(findLocationByListingId(listing));
+                listing.setUser(findUserByListingId(listing));
+                listing.setPhotos(findPhotosByListingId(listing));
+            }
+            return listings;
+        } catch (Exception e) {
+            log.error("Error fetching listings by category " + e.getCause() );
+            throw new DatabaseException("An error has occurred in fetching listings by category: " + category);
+        }
     }
 }

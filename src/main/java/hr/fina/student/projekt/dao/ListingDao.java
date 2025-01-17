@@ -7,6 +7,6 @@ import java.util.List;
 
 public interface ListingDao {
     List<Listing> findAllListings();
-
-    Location findLocationByListingId(int listingId);
+    Listing findListing(Integer id);
+    List<Listing> findListingByCategory(String category);
 }

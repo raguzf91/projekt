@@ -6,21 +6,17 @@ import hr.fina.student.projekt.service.ListingService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import static java.time.LocalDateTime.now;
 import static org.springframework.http.HttpStatus.OK;
 
 
-@Controller
+@RestController
 @RequestMapping("/api/listing")
 @RequiredArgsConstructor
 @Slf4j
@@ -42,6 +38,32 @@ public class ListingController {
                         .build()
         );
     }
+    @GetMapping("/{id}")
+    public ResponseEntity<HttpResponse> getListing(@PathVariable("id") Integer id) {
+        Listing listing = listingService.getListing(id);
+        return ResponseEntity.ok().body(
+                HttpResponse.builder()
+                        .timeStamp(now().toString())
+                        .data(Map.of("listingData", listing))
+                        .message("Listing fetched successfully")
+                        .status(OK)
+                        .statusCode(OK.value())
+                        .build()
+        );
+    }
 
+    @GetMapping("")
+    public ResponseEntity<HttpResponse> getListingByCategory(@RequestParam String category) {
+        List<Listing> listings = listingService.getListingsByCategory(category);
+        return ResponseEntity.ok().body(
+                HttpResponse.builder()
+                        .timeStamp(now().toString())
+                        .data(Map.of("listings", listings))
+                        .message("All listings fetched successfully")
+                        .status(OK)
+                        .statusCode(OK.value())
+                        .build()
+        );
+    }
 
 }

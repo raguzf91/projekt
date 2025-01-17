@@ -20,4 +20,14 @@ public class ListingServiceImpl implements ListingService {
     public List<Listing> getAllListings() {
         return listingDao.findAllListings();
     }
+
+    @Override
+    public Listing getListing(Integer id) {
+        return listingDao.findListing(id);
+    }
+
+    @Override
+    public List<Listing> getListingsByCategory(String category) {
+        return listingDao.findListingByCategory(category);
+    }
 }

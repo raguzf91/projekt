@@ -5,4 +5,7 @@ import java.util.List;
 
 public interface ListingService {
     public List<Listing> getAllListings();
+    public Listing getListing(Integer id);
+
+    List<Listing> getListingsByCategory(String category);
 }
