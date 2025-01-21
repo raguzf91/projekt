@@ -3,14 +3,12 @@ package hr.fina.student.projekt.dao.impl;
 import hr.fina.student.projekt.dao.ListingDao;
 import hr.fina.student.projekt.dao.LocationDao;
 import hr.fina.student.projekt.dao.UserDao;
-import hr.fina.student.projekt.entity.Listing;
-import hr.fina.student.projekt.entity.Location;
-import hr.fina.student.projekt.entity.Photo;
-import hr.fina.student.projekt.entity.User;
+import hr.fina.student.projekt.entity.*;
 import hr.fina.student.projekt.exceptions.database.DatabaseException;
 import hr.fina.student.projekt.mapper.ListingRowMapper;
 import hr.fina.student.projekt.mapper.ListingSecondRowMapper;
 import hr.fina.student.projekt.mapper.PhotoRowMapper;
+import hr.fina.student.projekt.mapper.ReviewRowMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -95,13 +93,27 @@ public class ListingDaoImpl implements ListingDao {
             final String FIND_LISTING_BY_ID = """
                 SELECT * FROM listings WHERE id = :id
             """;
+
+            final String FIND_ALL_REVIEWS_BY_LISTING_ID = """
+                SELECT * FROM reviews WHERE listing_id = :listingId
+            """;
+
             Listing listing = jdbc.queryForObject(FIND_LISTING_BY_ID, Map.of("id", id), new ListingRowMapper());
+            HashSet<Review> reviews = jdbc.query(FIND_ALL_REVIEWS_BY_LISTING_ID, Map.of("listingId", id), new ReviewRowMapper())
+                    .stream()
+                    .collect(HashSet::new, HashSet::add, HashSet::addAll);  // Collect all reviews into a set
+
+            listing.setReviews(reviews);
+            listing.setNumberOfReviews(reviews.size());
+
             listing.setLocation(findLocationByListingId(listing));
             listing.setUser(findUserByListingId(listing));
             listing.setPhotos(findPhotosByListingId(listing));
+
             return listing;
         } catch (Exception e) {
-            log.error("Error fetching listing by id {}", id, e.getCause());
+            log.error("Error fetching listing by id {}", id);
+            log.error(e.getCause().toString());
             throw new DatabaseException("An error has occurred in fetching listing by id: " + id);
         }
 

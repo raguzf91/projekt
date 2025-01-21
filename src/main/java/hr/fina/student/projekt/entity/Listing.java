@@ -30,6 +30,8 @@ public class Listing extends BaseEntity {
     private List<Rule> rules;
     private Set<Amenity> amenities;
     private String category;
+    private Integer maxGuests;
+    private Integer numberOfReviews;
 
    
 

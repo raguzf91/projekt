@@ -19,6 +19,8 @@ public class ListingRowMapper implements RowMapper<Listing> { ;
                 .category(rs.getString("category"))
                 .numberOfBedrooms(rs.getInt("number_of_bedrooms"))
                 .numberOfBeds(rs.getInt("number_of_beds"))
+                .maxGuests(rs.getInt("maximum_guests"))
+                .numberOfReviews(0)
                 .user(null)
                 .location(null)
                 .photos(null)
