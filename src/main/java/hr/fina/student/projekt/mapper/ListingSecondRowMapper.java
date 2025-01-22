@@ -11,8 +11,7 @@ public class ListingSecondRowMapper implements RowMapper<Listing> {
     public Listing mapRow(ResultSet rs, int rowNum) throws SQLException {
         return Listing.builder()
                 .id(rs.getInt("id"))
-                .description(rs.getString("description"))
-                .title(rs.getString("title"))
+                .typeOfListing(rs.getString("type_of_listing"))
                 .rating(rs.getDouble("rating"))
                 .price(rs.getDouble("price"))
                 .user(null)

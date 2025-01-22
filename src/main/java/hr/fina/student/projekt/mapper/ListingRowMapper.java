@@ -21,6 +21,8 @@ public class ListingRowMapper implements RowMapper<Listing> { ;
                 .numberOfBeds(rs.getInt("number_of_beds"))
                 .maxGuests(rs.getInt("maximum_guests"))
                 .numberOfReviews(0)
+                .secondaryTitle(rs.getString("secondary_title"))
+                .typeOfListing(rs.getString("type_of_listing"))
                 .user(null)
                 .location(null)
                 .photos(null)

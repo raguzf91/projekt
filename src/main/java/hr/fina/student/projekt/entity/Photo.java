@@ -15,4 +15,5 @@ public class Photo extends BaseEntity {
     
     private String photoUrl;
     private Integer listingId;
+    private Boolean bedroomPhoto;
 }

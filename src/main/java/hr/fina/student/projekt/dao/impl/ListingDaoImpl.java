@@ -5,10 +5,7 @@ import hr.fina.student.projekt.dao.LocationDao;
 import hr.fina.student.projekt.dao.UserDao;
 import hr.fina.student.projekt.entity.*;
 import hr.fina.student.projekt.exceptions.database.DatabaseException;
-import hr.fina.student.projekt.mapper.ListingRowMapper;
-import hr.fina.student.projekt.mapper.ListingSecondRowMapper;
-import hr.fina.student.projekt.mapper.PhotoRowMapper;
-import hr.fina.student.projekt.mapper.ReviewRowMapper;
+import hr.fina.student.projekt.mapper.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -30,7 +27,7 @@ public class ListingDaoImpl implements ListingDao {
     public List<Listing> findAllListings() {
         try {
             log.info("Fetching all listings");
-            final String FIND_ALL_LISTINGS = "SELECT id, description, title, rating, user_id, price FROM listings";
+            final String FIND_ALL_LISTINGS = "SELECT id, type_of_listing, rating, user_id, price FROM listings";
             List<Listing> listings = jdbc.query(FIND_ALL_LISTINGS, new ListingSecondRowMapper());
 
             for(Listing listing : listings) {
@@ -109,6 +106,7 @@ public class ListingDaoImpl implements ListingDao {
             listing.setLocation(findLocationByListingId(listing));
             listing.setUser(findUserByListingId(listing));
             listing.setPhotos(findPhotosByListingId(listing));
+            listing.setAmenities(findAmenitiesByListingId(id));
 
             return listing;
         } catch (Exception e) {
@@ -138,4 +136,20 @@ public class ListingDaoImpl implements ListingDao {
             throw new DatabaseException("An error has occurred in fetching listings by category: " + category);
         }
     }
+
+    private List<Amenity> findAmenitiesByListingId(Integer listingId) {
+        try{
+            final String FIND_AMENITIES_BY_LISTING_ID = """
+            SELECT id, description, icon FROM amenities WHERE id IN (
+                SELECT amenities_id FROM listingamenities WHERE listing_id = :listingId AND enabled = true
+            )
+        """;
+            return jdbc.query(FIND_AMENITIES_BY_LISTING_ID, Map.of("listingId", listingId), new AmenitiesRowMapper());
+        } catch (Exception e) {
+            log.error("Error fetching amenities for listing id {}", listingId);
+            log.error(e.getCause().toString());
+            throw new DatabaseException("An error has occurred in fetching amenities for listing id: " + listingId);
+        }
+    }
+
 }

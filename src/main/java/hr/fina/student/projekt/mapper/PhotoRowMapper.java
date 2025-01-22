@@ -13,6 +13,7 @@ public class PhotoRowMapper implements RowMapper<Photo> {
                 .id(rs.getInt("id"))
                 .photoUrl(rs.getString("photo_url"))
                 .listingId(rs.getInt("listing_id"))
+                .bedroomPhoto(rs.getBoolean("bedroom_photo"))
                 .build();
     }
 }
