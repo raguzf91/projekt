@@ -22,10 +22,9 @@ public class UserDTOMapper {
                 .dateOfBirth(user.getDateOfBirth())
                 .bio(user.getBio())
                 .languages(user.getSpeaksLanguages())
-                .enabled(user.isEnabled())
-                .accountLocked(user.isAccountLocked())
-                .roleName(role.getName())
-                .permissions(role.getPermission())
+                .responseRate(user.getResponseRate().doubleValue())
+                .profilePhoto(user.getProfilePhoto())
+                .createdAt(user.getCreatedAt().toLocalDate())
                 .build();
     }
 

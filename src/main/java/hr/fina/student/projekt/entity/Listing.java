@@ -2,6 +2,8 @@ package hr.fina.student.projekt.entity;
 
 import java.util.Set;
 import java.util.List;
+
+import hr.fina.student.projekt.dto.UserDTO;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -22,7 +24,7 @@ public class Listing extends BaseEntity {
     private boolean refundable;
     private Integer numberOfBedrooms;
     private Integer numberOfBeds;
-    private User user;
+    private UserDTO user;
     private List<Photo> photos;
     private Set<Reservation> reservations;
     private Set<Review> reviews;

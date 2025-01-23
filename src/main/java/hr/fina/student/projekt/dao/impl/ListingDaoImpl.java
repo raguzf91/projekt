@@ -3,6 +3,7 @@ package hr.fina.student.projekt.dao.impl;
 import hr.fina.student.projekt.dao.ListingDao;
 import hr.fina.student.projekt.dao.LocationDao;
 import hr.fina.student.projekt.dao.UserDao;
+import hr.fina.student.projekt.dto.UserDTO;
 import hr.fina.student.projekt.entity.*;
 import hr.fina.student.projekt.exceptions.database.DatabaseException;
 import hr.fina.student.projekt.mapper.*;
@@ -15,6 +16,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -51,14 +53,15 @@ public class ListingDaoImpl implements ListingDao {
     }
 
 
-    private User findUserByListingId(Listing listing) {
+    private UserDTO findUserByListingId(Listing listing) {
         try{
             final String FIND_USER_BY_LISTING_ID = """
                         SELECT user_id FROM listings WHERE id = :listingId
                     """;
             Integer listingId = listing.getId();
             Integer userId = jdbc.queryForObject(FIND_USER_BY_LISTING_ID, Map.of("listingId", listingId), Integer.class);
-            return userDao.findById(userId);
+            User user = userDao.findById(userId);
+            return UserDTOMapper.fromUser(user);
         } catch (Exception e) {
             log.error("Error fetching user for listing id {}", listing.getId(), e.getCause());
             throw new DatabaseException("An error has occurred in fetching user for listing id: " + listing.getId());
@@ -95,14 +98,21 @@ public class ListingDaoImpl implements ListingDao {
                 SELECT * FROM reviews WHERE listing_id = :listingId
             """;
 
+            final String INSERT_LISTING_RATING = """
+                UPDATE listings SET rating = :rating WHERE id = :id
+            """;
+
             Listing listing = jdbc.queryForObject(FIND_LISTING_BY_ID, Map.of("id", id), new ListingRowMapper());
             HashSet<Review> reviews = jdbc.query(FIND_ALL_REVIEWS_BY_LISTING_ID, Map.of("listingId", id), new ReviewRowMapper())
                     .stream()
                     .collect(HashSet::new, HashSet::add, HashSet::addAll);  // Collect all reviews into a set
-
+           reviews = reviews.stream().peek(
+        review -> review.setUser(userDao.findById(review.getUserId()))
+).collect(Collectors.toCollection(HashSet::new));
             listing.setReviews(reviews);
             listing.setNumberOfReviews(reviews.size());
-
+            listing.setRating(calculateTotalReviewScore(reviews));
+            jdbc.update(INSERT_LISTING_RATING, Map.of("rating", listing.getRating(), "id", id));
             listing.setLocation(findLocationByListingId(listing));
             listing.setUser(findUserByListingId(listing));
             listing.setPhotos(findPhotosByListingId(listing));
@@ -124,12 +134,31 @@ public class ListingDaoImpl implements ListingDao {
             final String FIND_LISTING_BY_CATEGORY = """
                 SELECT id, description, title, rating, user_id, price FROM listings WHERE category = :category;
             """;
+
+            final String INSERT_LISTING_RATING = """
+                UPDATE listings SET rating = :rating WHERE id = :id
+            """;
+
+            final String FIND_ALL_REVIEWS_BY_LISTING_ID = """
+                SELECT * FROM reviews WHERE listing_id = :listingId
+            """;
+
             List<Listing> listings = jdbc.query(FIND_LISTING_BY_CATEGORY, Map.of("category", category), new ListingSecondRowMapper());
             for(Listing listing : listings) {
                 listing.setLocation(findLocationByListingId(listing));
                 listing.setUser(findUserByListingId(listing));
                 listing.setPhotos(findPhotosByListingId(listing));
+                HashSet<Review> reviews = jdbc.query(FIND_ALL_REVIEWS_BY_LISTING_ID, Map.of("listingId", listing.getId()), new ReviewRowMapper())
+                        .stream()
+                        .collect(HashSet::new, HashSet::add, HashSet::addAll);  // Collect all reviews into a set
+                reviews = reviews.stream().peek(
+                        review -> review.setUser(userDao.findById(review.getUserId()))
+                ).collect(Collectors.toCollection(HashSet::new));
+                listing.setReviews(reviews);
+                listing.setNumberOfReviews(reviews.size());
+                listing.setRating(calculateTotalReviewScore(reviews));
             }
+
             return listings;
         } catch (Exception e) {
             log.error("Error fetching listings by category " + e.getCause() );
@@ -150,6 +179,12 @@ public class ListingDaoImpl implements ListingDao {
             log.error(e.getCause().toString());
             throw new DatabaseException("An error has occurred in fetching amenities for listing id: " + listingId);
         }
+    }
+
+    private double calculateTotalReviewScore(Set<Review> reviews) {
+        double numOfReviews = reviews.size();
+        double sumOfScores = reviews.stream().mapToDouble(Review::getNumberOfStars).sum();
+        return sumOfScores / numOfReviews;
     }
 
 }

@@ -1,5 +1,6 @@
 package hr.fina.student.projekt.dto;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
@@ -29,6 +30,7 @@ public class UserDTO {
     private String profilePhoto;
     private boolean enabled;
     private boolean accountLocked;
+    private LocalDate createdAt;
     private String roleName;
     private String permissions;
 
