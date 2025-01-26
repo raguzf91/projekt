@@ -40,7 +40,7 @@ public class TokenDaoImpl implements TokenDao {
     @Override
     public Token findByKey(String key) {
         final String FIND_TOKEN_BY_KEY = """
-                SELECT * FROM ActivationTokens WHERE key = :key
+                SELECT * FROM activationtokens WHERE key = :key
                 """; 
         try {
             Token token = jdbcTemplate.queryForObject(FIND_TOKEN_BY_KEY, Map.of("key", key), new TokenRowMapper());
@@ -49,7 +49,7 @@ public class TokenDaoImpl implements TokenDao {
             return null;
         } catch (Exception e) {
             log.error(e.getCause().toString());
-            throw new DatabaseException("An error has occured in finding token");
+            throw new DatabaseException("Molimo vas unesite ispravan kljuć");
         } 
     }
 

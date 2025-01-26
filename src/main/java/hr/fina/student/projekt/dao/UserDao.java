@@ -2,9 +2,11 @@ package hr.fina.student.projekt.dao;
 
 import org.springframework.dao.DataAccessException;
 
+import hr.fina.student.projekt.entity.Review;
 import hr.fina.student.projekt.entity.Token;
 import hr.fina.student.projekt.entity.User;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
 public interface    UserDao<T extends User> {
@@ -15,6 +17,7 @@ public interface    UserDao<T extends User> {
     T findById(Integer id) throws DataAccessException;
     Boolean updateUser(User user);
     Boolean deleteUser(Integer userId);
-
+    Integer getNumberOfReviews(Integer id);
+    List<Review> findAllReviews(Integer id);
     
 }

@@ -21,7 +21,10 @@ public class Review extends BaseEntity {
     private Integer location;
     private Integer checkIn;
     private Integer value;
+    private User author;
     private Integer userId;
-    private User user;
+    private Integer receiverId;
+    private Integer listingId;
+    
 
 }

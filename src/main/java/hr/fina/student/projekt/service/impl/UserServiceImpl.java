@@ -1,7 +1,9 @@
 package hr.fina.student.projekt.service.impl;
 
+import hr.fina.student.projekt.dao.ListingDao;
 import hr.fina.student.projekt.dao.TokenDao;
 import hr.fina.student.projekt.dao.UserDao;
+import hr.fina.student.projekt.entity.Review;
 import hr.fina.student.projekt.entity.Token;
 import hr.fina.student.projekt.entity.User;
 import hr.fina.student.projekt.exceptions.key.InvalidKeyException;
@@ -10,11 +12,13 @@ import hr.fina.student.projekt.exceptions.key.InvalidKeyException;
 
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
 
 import org.springframework.stereotype.Service;
 
 import hr.fina.student.projekt.service.EmailService;
+import hr.fina.student.projekt.service.ListingService;
 import hr.fina.student.projekt.service.UserService;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +32,7 @@ public class UserServiceImpl implements UserService {
     private final TokenDao tokenRepository;
     private final TokenDao activationTokenRepository;
     private final EmailService emailService;
+    private final ListingDao listingDao;
 
     @Override
     public User createUser(User user) {
@@ -62,8 +67,14 @@ public class UserServiceImpl implements UserService {
     }
 
      public void sendEmail(User user, String url, String emailType ) throws MessagingException {
-        deleteExistingTokens(user.getEmail());
-        String activationKey = generateAndSaveActivationToken(user, emailType);
+        String activationKey = null;
+        if(emailType.equals("activateAccount")) {
+            activationKey = generateAndSaveActivationToken(user, emailType);
+        } else {
+            deleteExistingTokens(user.getEmail());
+        }
+        
+        
         emailService.sendEmail(user.getFirstName(), user.getEmail(), url, activationKey, emailType);
     }
 
@@ -135,6 +146,20 @@ public class UserServiceImpl implements UserService {
         if(!userTokens.isEmpty()) {
             tokenRepository.deleteAllTokensByUserId(findUserByEmail(email).getId());
         }
+    }
+
+    public Double getAverageRatingScore(Integer id) {
+        return listingDao.getAverageRatingScore(id);
+    }
+
+    @Override
+    public Integer getNumberOfReviews(Integer id) {
+       return userRepository.getNumberOfReviews(id);
+    }
+
+    @Override
+    public List<Review> getReviews(Integer id) {
+        return userRepository.findAllReviews(id);
     }
 
     

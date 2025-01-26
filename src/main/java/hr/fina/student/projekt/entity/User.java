@@ -18,15 +18,18 @@ public class User extends BaseEntity {
     private String email;
     private String password;
     private Date dateOfBirth;
-    private String userGender;
+    private String gender;
     private String bio;
     private String phoneNumber;
-    private List<String> speaksLanguages;
+    private String[] speaksLanguages;
     private Integer responseRate;
     private String profilePhoto;
     private boolean enabled;
     private boolean accountLocked;
     private Role role;
+    private Double averageRating;
+    private String city;
+    private String country;
     
 
 

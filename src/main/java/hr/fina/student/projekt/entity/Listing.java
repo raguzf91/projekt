@@ -27,7 +27,7 @@ public class Listing extends BaseEntity {
     private UserDTO user;
     private List<Photo> photos;
     private Set<Reservation> reservations;
-    private Set<Review> reviews;
+    private List<Review> reviews;
     private Location location;
     private List<Rule> rules;
     private List<Amenity> amenities;
@@ -36,6 +36,8 @@ public class Listing extends BaseEntity {
     private Integer numberOfReviews;
     private String typeOfListing;
     private String secondaryTitle;
+    private Integer numberOfBathrooms;
+    private Double cleaningFee;
 
 
    

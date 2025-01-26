@@ -23,6 +23,8 @@ public class ListingRowMapper implements RowMapper<Listing> { ;
                 .numberOfReviews(0)
                 .secondaryTitle(rs.getString("secondary_title"))
                 .typeOfListing(rs.getString("type_of_listing"))
+                .numberOfBathrooms(rs.getInt("number_of_bathrooms"))
+                .cleaningFee(rs.getDouble("cleaning_fee"))
                 .user(null)
                 .location(null)
                 .photos(null)

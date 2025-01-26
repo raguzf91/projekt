@@ -26,5 +26,7 @@ public class RegisterRequest {
     private String phoneNumber;
     @NotNull(message = "Date of birth is required")
     private Date dateOfBirth;
+    @NotNull(message = "Gender is required")
+    private String gender;
 
 }

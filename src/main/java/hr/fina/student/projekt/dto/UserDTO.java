@@ -18,6 +18,7 @@ import lombok.ToString;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserDTO {
+    private Integer id;
     private String firstName;
     private String lastName;
     private String email;
@@ -25,13 +26,16 @@ public class UserDTO {
     private String gender;
     private String bio;
     private String phoneNumber;
-    private List<String> languages;
+    private String[] speaksLanguages;
     private Double responseRate;
     private String profilePhoto;
     private boolean enabled;
     private boolean accountLocked;
     private LocalDate createdAt;
+    private Double averageRating;
     private String roleName;
     private String permissions;
+    private String city;
+    private String country;
 
 }

@@ -1,6 +1,9 @@
 package hr.fina.student.projekt.dao.impl;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.List;
+
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -8,7 +11,11 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Repository;
+
+import hr.fina.student.projekt.dao.ListingDao;
 import hr.fina.student.projekt.dao.UserDao;
+import hr.fina.student.projekt.entity.Listing;
+import hr.fina.student.projekt.entity.Review;
 import hr.fina.student.projekt.entity.User;
 import hr.fina.student.projekt.entity.UserPrincipal;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +30,7 @@ import hr.fina.student.projekt.enums.*;
 import hr.fina.student.projekt.exceptions.database.DatabaseException;
 import hr.fina.student.projekt.exceptions.user.UserAlreadyExistsException;
 import hr.fina.student.projekt.mapper.UserRowMapper;
-
+import hr.fina.student.projekt.mapper.ReviewRowMapper;
 
 @Repository
 @RequiredArgsConstructor
@@ -36,7 +43,7 @@ public class UserDaoImpl implements UserDao<User>, UserDetailsService {
     @Override
     public User create(User user) throws DataAccessException {
         final String SAVE_USER_QUERY = """
-        INSERT INTO users (first_name, last_name, email, password, date_of_birth, user_gender, bio, phone_number, response_rate, profile_photo, account_locked, enabled) VALUES (:firstName, :lastName, :email, :password, :dateOfBirth, :userGender, :bio, :phoneNumber, :responseRate, :profilePhoto, :accountLocked, :enabled)
+        INSERT INTO users (first_name, last_name, email, password, date_of_birth, user_gender, phone_number, account_locked, enabled) VALUES (:firstName, :lastName, :email, :password, :dateOfBirth, :gender, :phoneNumber,  :accountLocked, :enabled)
         """;
 
         
@@ -58,7 +65,9 @@ public class UserDaoImpl implements UserDao<User>, UserDetailsService {
 
         // Add and save the role    to the user
 
-        roleRepository.addRoleToUser(user.getId(), RoleType.ROLE_USER.name());                              
+        roleRepository.addRoleToUser(user.getId(), RoleType.ROLE_USER.name()); 
+        user.setCreatedAt(LocalDateTime.now());
+        user.setUpdatedAt(LocalDateTime.now());                             
            return user;
        } catch (Exception e) {
         log.error("Couldn't save user: " + e.getMessage());
@@ -76,12 +85,9 @@ public class UserDaoImpl implements UserDao<User>, UserDetailsService {
             .addValue("lastName", user.getLastName())
             .addValue("password", encoder.encode(user.getPassword()))
             .addValue("email", user.getEmail())
-            .addValue("userGender", user.getUserGender()) 
+            .addValue("gender", user.getGender()) 
             .addValue("dateOfBirth", user.getDateOfBirth())
-            .addValue("bio", user.getBio())
             .addValue("phoneNumber", user.getPhoneNumber())
-            .addValue("responseRate", user.getResponseRate())
-            .addValue("profilePhoto", user.getProfilePhoto())
             .addValue("accountLocked", user.isAccountLocked())
             .addValue("enabled", user.isEnabled());
             //.addValue("speaksLanguages", user.getSpeaksLanguages());
@@ -167,6 +173,42 @@ public class UserDaoImpl implements UserDao<User>, UserDetailsService {
             return new UserPrincipal(user, roleRepository.getRoleByUserId(user.getId()));
         }
     }
+
+
+    @Override
+    public Integer getNumberOfReviews(Integer id) {
+        final String GET_NUMBER_OF_REVIEWS = """
+                SELECT COUNT(*) FROM reviews WHERE receiver_id = :id
+                """;
+        try {
+            Integer numberOfReviews = jdbcTemplate.queryForObject(GET_NUMBER_OF_REVIEWS, Map.of("id", id), Integer.class);
+            log.info("Number of reviews: {}", numberOfReviews);
+            return numberOfReviews;
+        } catch (Exception e) {
+            
+            log.error("Error getting number of reviews: " + e.getCause());
+            throw new DatabaseException("An error occured in getting the number of reviews");
+        }
+
+        
+    }
+
+    @Override
+        public List<Review> findAllReviews(Integer id) {
+            final String FIND_ALL_REVIEWS = """
+                    SELECT * FROM reviews WHERE receiver_id = :id
+                    """;
+            try {
+                List<Review> reviews = jdbcTemplate.query(FIND_ALL_REVIEWS, Map.of("id", id), new ReviewRowMapper());
+                reviews.forEach(review -> review.setAuthor(findById(review.getUserId())));
+                return reviews;
+            } catch (Exception e) {
+                log.error("Error finding all reviews: " + e.getCause());
+                throw new DatabaseException("An error occured in finding all reviews");
+            }
+        }
+
+    
 
 
     

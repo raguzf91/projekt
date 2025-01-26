@@ -1,11 +1,12 @@
 package hr.fina.student.projekt.mapper;
 
 import hr.fina.student.projekt.entity.Review;
+
+
 import org.springframework.jdbc.core.RowMapper;
-import java.time.LocalDate;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.LocalDateTime;
 
 public class ReviewRowMapper implements RowMapper<Review> {
     @Override
@@ -21,7 +22,9 @@ public class ReviewRowMapper implements RowMapper<Review> {
                 .location(rs.getInt("location"))
                 .value(rs.getInt("value"))
                 .userId(rs.getInt("user_id"))
+                .receiverId(rs.getInt("receiver_id"))
                 .createdAt(rs.getTimestamp("created_at").toLocalDateTime())
+                .listingId(rs.getInt("listing_id"))
                 .build();
     }
 }

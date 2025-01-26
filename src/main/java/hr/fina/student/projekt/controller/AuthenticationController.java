@@ -1,6 +1,13 @@
 package hr.fina.student.projekt.controller;
 
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.servlet.view.RedirectView;
 
 import hr.fina.student.projekt.dto.UserDTO;
@@ -57,14 +64,13 @@ public class AuthenticationController {
 
         User user = userService.createUser(registerRequestToUser(request));
 
-        // send verification mail
-        //TODO url je link na koji će activate account button u emailu redirectati korisnika - STAVI GA U FINALNU VARIJABLU
+        
         sendEmail(user, "http://localhost:8080/api/auth/activate-account}" , "activateAccount");
         UserDTO userDTO = fromUser(user, roleService.getRoleByUserId(user.getId()));
-         return ResponseEntity.created(getUri()).body(
+         return ResponseEntity.ok().body(
                 HttpResponse.builder()
                         .timeStamp(now().toString())
-                        .data(of("user", userDTO))
+                        .data(of("user", userDTO, "activationType", "ACTIVATE_ACCOUNT"))
                         .message(String.format("User account created for user %s", request.getFirstName()))
                         .status(CREATED)
                         .statusCode(CREATED.value()) 
@@ -109,8 +115,8 @@ public class AuthenticationController {
         
     }
 
-    @GetMapping("/activate-account")
-    public ResponseEntity<HttpResponse> confirmAccount(@RequestParam String email, @RequestParam String key) throws MessagingException {
+    @GetMapping("/activate/account/{email}/{key}")
+    public ResponseEntity<HttpResponse> confirmAccount(@PathVariable("email") String email, @PathVariable("key") String key) throws MessagingException {
         try {
             userService.activateAccount(email, key);
             return ResponseEntity.ok(

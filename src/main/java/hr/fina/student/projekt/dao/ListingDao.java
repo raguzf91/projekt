@@ -9,4 +9,6 @@ public interface ListingDao {
     List<Listing> findAllListings();
     Listing findListing(Integer id);
     List<Listing> findListingByCategory(String category);
+    List<Listing> findListingsByUserId(Integer userId);
+    Double getAverageRatingScore(Integer id);
 }

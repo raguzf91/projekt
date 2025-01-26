@@ -14,17 +14,23 @@ public class UserDTOMapper {
 
     public static UserDTO fromUser(User user, Role role) {
         return UserDTO.builder()
+                .id(user.getId())
                 .email(user.getEmail())
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
                 .phoneNumber(user.getPhoneNumber())
-                .gender(user.getUserGender())
+                .gender(user.getGender())
                 .dateOfBirth(user.getDateOfBirth())
-                .bio(user.getBio())
-                .languages(user.getSpeaksLanguages())
-                .responseRate(user.getResponseRate().doubleValue())
-                .profilePhoto(user.getProfilePhoto())
-                .createdAt(user.getCreatedAt().toLocalDate())
+                .bio(user.getBio() != null ? user.getBio() : "")
+                .speaksLanguages(user.getSpeaksLanguages() != null ? user.getSpeaksLanguages() : new String[0])
+                .responseRate(user.getResponseRate() != null ? user.getResponseRate().doubleValue() : 0)
+                .profilePhoto(user.getProfilePhoto() != null ? user.getProfilePhoto() : "")
+                .averageRating(user.getAverageRating() != null ? user.getAverageRating() : 0)
+                .createdAt(user.getCreatedAt().toLocalDate() != null ? user.getCreatedAt().toLocalDate() : null )
+                .city(user.getCity() != null ? user.getCity() : "")
+                .country(user.getCountry() != null ? user.getCountry() : "")
+                .roleName(role.getName())
+                .permissions(role.getPermission())
                 .build();
     }
 
