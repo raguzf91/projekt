@@ -23,6 +23,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.cors.CorsConfiguration;
 
 @Configuration
 @EnableWebSecurity
@@ -50,17 +51,17 @@ public class SecurityConfig {
  public SecurityFilterChain securityFilterChain(HttpSecurity http)  throws Exception {
     http
         .csrf(AbstractHttpConfigurer::disable)
-        .cors(cors -> cors.disable())
+        .cors(request -> new CorsConfiguration().applyPermitDefaultValues())
         .authorizeHttpRequests(authorize -> authorize
             .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.POST, "/api/auth/**")).permitAll()
             .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/api/auth/**")).permitAll()
             .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/api/listing/**")).permitAll()
-            .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/api/user/**")).permitAll()
-                        .requestMatchers(HttpMethod.OPTIONS,"/**").permitAll()
+            .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/api/user/**")).permitAll().requestMatchers(HttpMethod.OPTIONS,"/**").permitAll()
             .requestMatchers("/login").permitAll()
             .requestMatchers("/register").permitAll()
 			.requestMatchers("/user/**").hasRole("USER")       
-			.requestMatchers("/admin/**").hasRole("ADMIN")     
+			.requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/booking").hasRole("USER")
 			.anyRequest().authenticated()               
 			)
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -80,9 +81,6 @@ public class SecurityConfig {
     return http.build();
  }
 
-    
-
-   
 
  @Bean
  @Lazy
@@ -98,10 +96,4 @@ public class SecurityConfig {
      return configuration.getAuthenticationManager();
  }
 
-
-
-    
-
-    
-    
 }

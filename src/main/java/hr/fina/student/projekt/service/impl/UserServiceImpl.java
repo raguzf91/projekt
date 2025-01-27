@@ -59,7 +59,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void verifyAccount(String key, String email) {
+    public void verifyAccount(String email, String key) {
         log.info("Verifying account");
         User user = verifyCode(email, key);
        
@@ -69,6 +69,8 @@ public class UserServiceImpl implements UserService {
      public void sendEmail(User user, String url, String emailType ) throws MessagingException {
         String activationKey = null;
         if(emailType.equals("activateAccount")) {
+            activationKey = generateAndSaveActivationToken(user, emailType);
+        } else if(emailType.equals("verifyAccount")) {
             activationKey = generateAndSaveActivationToken(user, emailType);
         } else {
             deleteExistingTokens(user.getEmail());
@@ -122,7 +124,9 @@ public class UserServiceImpl implements UserService {
             
             if(userByCode.getEmail().equalsIgnoreCase(userByEmail.getEmail())) {
                 if(LocalDateTime.now().isAfter(token.getExpiresAt())) {
+                    deleteExistingTokens(email);
                     sendEmail(userByCode, code, email);
+                    throw new InvalidKeyException("Kljuć je istekao. Novi kljuć vam je poslan ");
                 } else {
                     token.setConfirmedAt(LocalDateTime.now());
                     tokenRepository.updateActivationToken(token);

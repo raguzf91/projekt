@@ -32,7 +32,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain)
             throws ServletException, IOException {
-                //TODO MAP<Sstring, String> values = get requestValues napravi
+
                 //extract the jwt token from the Auth header
                     final String authHeader = request.getHeader("AUTHORIZATION");
                     final String jwtToken;

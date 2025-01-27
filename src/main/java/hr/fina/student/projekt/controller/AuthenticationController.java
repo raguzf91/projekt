@@ -51,7 +51,7 @@ import static hr.fina.student.projekt.mapper.RegisterRequestMapper.registerReque
 @RequiredArgsConstructor
 @Slf4j
 @CrossOrigin("*")
-public class AuthenticationController {
+public class AuthenticationController{
 
     
     private final UserService userService;
@@ -79,19 +79,20 @@ public class AuthenticationController {
     }
 
     @PostMapping("/login") 
-    public RedirectView login(@RequestBody @Valid LoginRequest loginRequest) throws MessagingException, UnsupportedEncodingException {
+    public ResponseEntity<HttpResponse> login(@RequestBody @Valid LoginRequest loginRequest) throws MessagingException, UnsupportedEncodingException {
         UserPrincipal user = authenticate(loginRequest.getEmail(), loginRequest.getPassword());
         sendEmail(user.getUser(), "http://localhost:8080/api/auth/verify/code/" + user.getUser().getEmail() + "/", "verifyAccount");
-        
-        String redirectUrl = "/VerifyAccount.html?email=" + URLEncoder.encode(user.getUser().getEmail(), StandardCharsets.UTF_8.toString());
-        return new RedirectView(redirectUrl);
-        }
-        
-        @GetMapping("/verifyAccount")
-        public String verifyAccountPage(@RequestParam String email, Model model) {
-            model.addAttribute("email", email);
-            return "VerifyAccount";
-        }
+        return ResponseEntity.ok().body(
+                HttpResponse.builder()
+                        .timeStamp(now().toString())
+                        .data(of("user", user, "activationType", "VERIFY_ACCOUNT"))
+                        .message("Korisnik je uspješno prijavljen")
+                        .status(OK)
+                        .statusCode(OK.value())
+                        .build());
+
+    }
+
         
     
         
@@ -122,7 +123,7 @@ public class AuthenticationController {
             return ResponseEntity.ok(
                 HttpResponse.builder()
                     .timeStamp(LocalDateTime.now().toString())
-                    .message("Account successfully activated")
+                    .message("Račun uspješno aktiviran")
                     .status(HttpStatus.OK)
                     .statusCode(HttpStatus.OK.value())
                     .build()
@@ -192,10 +193,7 @@ public class AuthenticationController {
     private void sendEmail(User user, String url, String emailType) throws MessagingException {
         userService.sendEmail(user, url, emailType);
     }
-        
-           
-    
-    
+
 }
 
 

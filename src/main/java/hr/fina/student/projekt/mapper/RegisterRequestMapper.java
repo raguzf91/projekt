@@ -11,6 +11,7 @@ public class RegisterRequestMapper {
                 .lastName(request.getLastName())
                 .phoneNumber(request.getPhoneNumber())
                 .dateOfBirth(request.getDateOfBirth())
+                .gender(request.getGender())
                 .build();
     }
 }
