@@ -141,7 +141,7 @@ public class UserServiceImpl implements UserService {
             log.error("Error verifying code" + e.getCause().toString());
             throw new InvalidKeyException("Key is incorrect. Please enter a valid key");
         }
-        return null;
+
     }
 
     private void deleteExistingTokens(String email) {
