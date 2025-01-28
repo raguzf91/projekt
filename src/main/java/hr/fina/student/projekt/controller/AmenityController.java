@@ -23,7 +23,7 @@ import java.util.Map;
 public class AmenityController {
     private final AmenityService amenityService;
 
-    @GetMapping("/")
+    @GetMapping("/all")
     public ResponseEntity<HttpResponse> getAmenities() {
         return ResponseEntity.ok().body(
                 HttpResponse.builder()

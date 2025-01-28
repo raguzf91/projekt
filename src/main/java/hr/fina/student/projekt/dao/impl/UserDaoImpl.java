@@ -148,13 +148,15 @@ public class UserDaoImpl implements UserDao<User>, UserDetailsService {
     @Override
     public User findById(Integer id) throws DataAccessException {
         final String FIND_USER_BY_ID = """
-                SELECT * FROM Users WHERE id = :id
+                SELECT * FROM users WHERE id = :id
                 """;
                 log.info("Finding user by id: {}");
         try {
             User user = jdbcTemplate.queryForObject(FIND_USER_BY_ID, Map.of("id", id), new UserRowMapper());
             return user;
         } catch (EmptyResultDataAccessException exception) {
+            log.error(exception.getCause().toString());
+            log.error("User not found by id");
             return null;
         } catch (Exception e) {
             log.error("Error finding user by id" + e.getCause());
