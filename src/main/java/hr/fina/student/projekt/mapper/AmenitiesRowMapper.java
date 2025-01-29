@@ -10,7 +10,7 @@ public class AmenitiesRowMapper implements RowMapper<Amenity> {
     @Override
     public Amenity mapRow(ResultSet rs, int rowNum) throws SQLException {
         return Amenity.builder()
-                .id(rs.getInt("id"))
+                .id(rs.getInt("id") )
                 .description(rs.getString("description"))
                 .icon(rs.getString("icon"))
                 .build();

@@ -11,12 +11,14 @@ public class LocationRowMapper implements RowMapper<Location> {
     public Location mapRow(ResultSet rs, int rowNum) throws SQLException {
         return Location.builder()
                 .id(rs.getInt("id"))
-                .address(rs.getString("address"))
+                .street(rs.getString("street"))
+                .streetNumber(rs.getString("street_number"))
                 .city(rs.getString("city"))
-                .zipcode(rs.getString("zipcode"))
+                .postalCode(rs.getString("postal_code"))
                 .country(rs.getString("country"))
                 .latitude(rs.getDouble("latitude"))
                 .longitude(rs.getDouble("longitude"))
+                .fullAddress(rs.getString("full_address"))
                 .build();
     }
 }

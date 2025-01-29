@@ -1,5 +1,6 @@
 package hr.fina.student.projekt.dao.impl;
 
+import hr.fina.student.projekt.dao.AmenityDao;
 import hr.fina.student.projekt.dao.ListingDao;
 import hr.fina.student.projekt.dao.LocationDao;
 import hr.fina.student.projekt.dao.UserDao;
@@ -9,7 +10,12 @@ import hr.fina.student.projekt.exceptions.database.DatabaseException;
 import hr.fina.student.projekt.mapper.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
 import java.util.HashSet;
@@ -25,6 +31,7 @@ public class ListingDaoImpl implements ListingDao {
     private final NamedParameterJdbcTemplate jdbc;
     private final LocationDao locationDao;
     private final UserDao userDao;
+    private final AmenityDao amenityDao;
 
     public List<Listing> findAllListings() {
         try {
@@ -189,27 +196,27 @@ public class ListingDaoImpl implements ListingDao {
         try{
             log.info("Fetching listings by category {}", category);
             final String FIND_LISTING_BY_CATEGORY = """
-                SELECT id, description, title, rating, user_id, price FROM listings WHERE category = :category;
-            """;
+            SELECT l.id, l.description, l.title, l.rating, l.user_id, l.price, l.type_of_listing 
+            FROM listings l
+            JOIN listingamenities la ON l.id = la.listing_id
+            JOIN amenities a ON la.amenities_id = a.id
+            WHERE a.description = :category
+        """;
 
-            final String INSERT_LISTING_RATING = """
-                UPDATE listings SET rating = :rating WHERE id = :id
-            """;
-
-            final String FIND_ALL_REVIEWS_BY_LISTING_ID = """
-                SELECT * FROM reviews WHERE listing_id = :listingId
-            """;
+           
 
             List<Listing> listings = jdbc.query(FIND_LISTING_BY_CATEGORY, Map.of("category", category), new ListingSecondRowMapper());
+
             for(Listing listing : listings) {
-                listing.setLocation(findLocationByListingId(listing));
-                listing.setUser(findUserByListingId(listing));
-                listing.setPhotos(findPhotosByListingId(listing));
-                List<Review> reviews = jdbc.query(FIND_ALL_REVIEWS_BY_LISTING_ID, Map.of("listingId", listing.getId()), new ReviewRowMapper());
-                reviews.stream().forEach(review -> review.setAuthor(userDao.findById(review.getUserId())));
-                listing.setReviews(reviews);
-                listing.setNumberOfReviews(reviews.size());
-                listing.setRating(calculateTotalReviewScore(reviews));
+                if(listing.getLocation() == null) {
+                    listing.setLocation(locationDao.findLocationByListingId(listing.getId()));
+                }
+                if(listing.getUser() == null) {
+                    listing.setUser(findUserByListingId(listing));
+                }
+                if(listing.getPhotos() == null) {
+                    listing.setPhotos(findPhotosByListingId(listing));
+                }
             }
 
             return listings;
@@ -238,6 +245,104 @@ public class ListingDaoImpl implements ListingDao {
         double numOfReviews = reviews.size();
         double sumOfScores = reviews.stream().mapToDouble(Review::getNumberOfStars).sum();
         return sumOfScores / numOfReviews;
+    }
+
+    private SqlParameterSource getSqlParameterSource(Listing listing) {
+        return new MapSqlParameterSource()
+                .addValue("title", listing.getTitle())
+                .addValue("description", listing.getDescription())
+                .addValue("price", listing.getPrice())
+                .addValue("cleaningFee", listing.getCleaningFee())
+                .addValue("refundable", listing.isRefundable())
+                .addValue("maxGuests", listing.getMaxGuests())
+                .addValue("numberOfBedrooms", listing.getNumberOfBedrooms())
+                .addValue("numberOfBeds", listing.getNumberOfBeds())
+                .addValue("numberOfBathrooms", listing.getNumberOfBathrooms())
+                .addValue("typeOfListing", listing.getTypeOfListing());
+            
+    }
+
+    private SqlParameterSource getSqlParameterSource(Location location) {
+        return new MapSqlParameterSource()
+            .addValue("streetNumber", location.getStreetNumber())
+            .addValue("street", location.getStreet())
+            .addValue("city", location.getCity())
+            .addValue("country", location.getCountry())
+            .addValue("postalCode", location.getPostalCode())
+            .addValue("latitude", location.getLatitude())
+            .addValue("longitude", location.getLongitude())
+            .addValue("fullAddress", location.getFullAddress());
+            
+    }
+
+    private SqlParameterSource getSqlParameterSource(Photo photo) {
+        return new MapSqlParameterSource()
+            .addValue("photoUrl", photo.getPhotoUrl())
+            .addValue("name", photo.getName())
+            .addValue("bedroomPhoto", photo.getBedroomPhoto());
+    }
+
+
+    private void insertLocation(Listing listing, Integer listingId) {
+        final String INSERT_LOCATION = """
+            INSERT INTO locations (country, city, street, postal_code, longitude, latitude, listing_id) 
+            VALUES (:country, :city, :street, :postalCode, :longitude, :latitude, :listingId)
+        """;
+        jdbc.update(INSERT_LOCATION, ((MapSqlParameterSource) getSqlParameterSource(listing.getLocation())).addValue("listingId", listingId));
+    }
+
+    private void insertPhotos(List<Photo> photos, Integer listingId) {
+        final String INSERT_PHOTO = """
+            INSERT INTO photos (photo_url, name, bedroom_photo) 
+            VALUES (:photoUrl, :name, :bedroomPhoto)
+        """;
+        final String INSERT_LISTING_PHOTO = """
+            INSERT INTO listingphotos (listing_id, photo_id) 
+            VALUES (:listingId, :photoId)
+        """;
+        for(Photo photo : photos) {
+            KeyHolder holder = new GeneratedKeyHolder();
+            jdbc.update(INSERT_PHOTO, getSqlParameterSource(photo), holder, new String[] {"id"});
+            Integer photoId = (Integer)holder.getKey();
+            jdbc.update(INSERT_LISTING_PHOTO, Map.of("listingId", listingId, "photoId", photoId));
+        }
+    }
+
+    private void insertAmenities(List<Amenity> amenities, Integer listingId) {
+        
+        final String INSERT_LISTING_AMENITY = """
+            INSERT INTO listingamenities (listing_id, amenities_id, enabled) 
+            VALUES (:listingId, :amenitiesId, true)
+        """;
+        for(Amenity amenity : amenities) {   
+            
+            jdbc.update(INSERT_LISTING_AMENITY, Map.of("listingId", listingId, "amenitiesId", amenity.getId()));
+        }
+    }
+
+
+    @Override
+    public void createListing(Listing listing) {
+        try {
+            log.info("Creating listing");
+            final String INSERT_LISTING = """
+                INSERT INTO listings (title, description, price, cleaning_fee, refundable, maximum_guests, number_of_bedrooms, number_of_beds, number_of_bathrooms, type_of_listing) 
+                VALUES (:title, :description, :price, :cleaningFee, :refundable, :maxGuests, :numberOfBedrooms, :numberOfBeds, :numberOfBathrooms, :typeOfListing)
+            """;
+            SqlParameterSource params = getSqlParameterSource(listing);
+            KeyHolder holder = new GeneratedKeyHolder();
+            jdbc.update(INSERT_LISTING, params, holder, new String[] {"id"});
+
+            listing.setId((Integer)holder.getKey());
+            Integer listingId = listing.getId();
+
+            insertLocation(listing, listingId);
+            insertPhotos(listing.getPhotos(), listingId);
+            insertAmenities(listing.getAmenities(), listingId);
+        } catch (Exception e) {
+            log.error("Error creating listing", e.getCause());
+            throw new DatabaseException("An error has occurred in creating listing");
+        }
     }
 
 }

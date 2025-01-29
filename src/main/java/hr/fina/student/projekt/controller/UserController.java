@@ -13,6 +13,9 @@ import lombok.extern.slf4j.Slf4j;
 import static java.time.LocalDateTime.now;
 import static org.springframework.http.HttpStatus.OK;
 import java.util.Map;
+import org.springframework.web.bind.annotation.RequestParam;
+import static java.lang.Integer.parseInt;
+
 
 @RestController
 @RequestMapping("/api/user")
@@ -34,4 +37,17 @@ public class UserController {
                         .build()
         );
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<HttpResponse> getMethodName(@PathVariable("id") Integer id) {
+        return ResponseEntity.ok().body(
+                HttpResponse.builder()
+                        .data(Map.of("user", userService.findUserById((id))))
+                        .message("Reviews fetched successfully")
+                        .status(OK)
+                        .statusCode(OK.value())
+                        .build()
+        );
+    }
+    
 }

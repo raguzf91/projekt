@@ -6,4 +6,6 @@ import java.util.List;
 
 public interface AmenityService {
     List<Amenity> getAllAmenities();
+    Amenity findAmenitiesByDescription(String description);
 }
+

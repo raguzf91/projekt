@@ -31,11 +31,10 @@ public class Listing extends BaseEntity {
     private Location location;
     private List<Rule> rules;
     private List<Amenity> amenities;
-    private String category;
     private Integer maxGuests;
     private Integer numberOfReviews;
     private String typeOfListing;
-    private String secondaryTitle;
+
     private Integer numberOfBathrooms;
     private Double cleaningFee;
 

@@ -19,5 +19,10 @@ public class AmenityServiceImpl implements AmenityService {
         return amenityDao.findAllAmenities();
     }
 
+    @Override
+    public Amenity findAmenitiesByDescription(String description) {
+        return amenityDao.findAmenitiesByDescription(description);
+    }
+
 
 }

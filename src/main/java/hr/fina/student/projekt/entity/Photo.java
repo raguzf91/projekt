@@ -14,6 +14,7 @@ import lombok.experimental.SuperBuilder;
 public class Photo extends BaseEntity {
     
     private String photoUrl;
+    private String name;
     private Integer listingId;
     private Boolean bedroomPhoto;
 }

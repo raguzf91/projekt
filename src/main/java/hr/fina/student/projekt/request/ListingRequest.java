@@ -1,41 +1,44 @@
 package hr.fina.student.projekt.request;
 
+import java.io.Serializable;
 import java.util.List;
+
+import hr.fina.student.projekt.entity.Location;
+import lombok.AllArgsConstructor;
 import lombok.Data;
-
+import hr.fina.student.projekt.entity.Photo;
+import jakarta.validation.constraints.NotBlank;
 @Data
-public class ListingRequest {
+@AllArgsConstructor
+public class ListingRequest implements Serializable{
+    
+    @NotBlank
     private String title;
+    @NotBlank
     private String description;
+    @NotBlank
     private double price;
+    @NotBlank
     private double cleaningFee;
+    @NotBlank
     private boolean refundable;
+    @NotBlank
     private int maxGuests;
+    @NotBlank
     private int numberOfBedrooms;
+    @NotBlank
     private int numberOfBeds;
+    @NotBlank
     private int numberOfBathrooms;
-    private String fullAddress;
-    private double latitude;
-    private double longitude;
+    @NotBlank
     private String typeOfListing;
+    @NotBlank
     private List<Photo> photos;
+    @NotBlank
     private List<String> amenities;
-    private FullLocation fullLocation;
+    @NotBlank
+    private Location fullLocation;
 
-    @Data
-    public static class Photo {
-        private String photoUrl;
-        private String name;
-    }
 
-    @Data
-    public static class FullLocation {
-        private String streetNumber;
-        private String street;
-        private String city;
-        private String country;
-        private String postalCode;
-        private double latitude;
-        private double longitude;
-    }
+    
 }

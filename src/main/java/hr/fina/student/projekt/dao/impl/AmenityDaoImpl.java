@@ -33,4 +33,17 @@ public class AmenityDaoImpl implements AmenityDao {
             throw new DatabaseException("An error has occurred in fetching Amenities from the database");
         }
     }
+    @Override
+    public Amenity findAmenitiesByDescription(String description) {
+        final String FIND_AMENITIES_BY_DESCRIPTION = "SELECT * FROM amenities WHERE description = :description";
+        Map<String, Object> params = Map.of("description", description);
+        log.info("Fetching amenities by description from the database");
+        try {
+            return jdbc.queryForObject(FIND_AMENITIES_BY_DESCRIPTION, params, new AmenitiesRowMapper());
+        } catch (Exception e) {
+            log.error("Error fetching amenities by description from the database");
+            log.error(e.getCause().toString());
+            throw new DatabaseException("An error has occurred in fetching Amenities by description from the database");
+        }
+    }
 }
