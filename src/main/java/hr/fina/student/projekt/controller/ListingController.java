@@ -66,4 +66,18 @@ public class ListingController {
         );
     }
 
+    @PostMapping("/create")
+    public ResponseEntity<HttpResponse> createListing(@RequestBody Listing listing) {
+        listingService.createListing(listing);
+        return ResponseEntity.ok().body(
+                HttpResponse.builder()
+                        .timeStamp(now().toString())
+
+                        .message("Listing created successfully")
+                        .status(OK)
+                        .statusCode(OK.value())
+                        .build()
+        );
+    }
+
 }

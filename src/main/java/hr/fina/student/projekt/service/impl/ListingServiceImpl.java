@@ -2,6 +2,7 @@ package hr.fina.student.projekt.service.impl;
 
 import hr.fina.student.projekt.dao.ListingDao;
 import hr.fina.student.projekt.entity.Listing;
+import hr.fina.student.projekt.request.ListingRequest;
 import hr.fina.student.projekt.service.ListingService;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
@@ -30,4 +31,20 @@ public class ListingServiceImpl implements ListingService {
     public List<Listing> getListingsByCategory(String category) {
         return listingDao.findListingByCategory(category);
     }
+
+    @Override
+    public void createListing(ListingRequest listingRequest) {
+        //convert request to entity
+        Listing listing = Listing.builder()
+                .title(listingRequest.getTitle())
+                .description(listingRequest.getDescription())
+                .category(listingRequest.getCategory())
+                .price(listingRequest.getPrice())
+
+                .build();
+        listingDao.createListing(listingRequest);
+
+    }
+
+
 }
