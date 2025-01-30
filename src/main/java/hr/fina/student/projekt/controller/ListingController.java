@@ -1,8 +1,5 @@
 package hr.fina.student.projekt.controller;
-
 import hr.fina.student.projekt.entity.Listing;
-import hr.fina.student.projekt.entity.Location;
-import hr.fina.student.projekt.entity.Photo;
 import hr.fina.student.projekt.request.ListingRequest;
 import hr.fina.student.projekt.response.HttpResponse;
 import hr.fina.student.projekt.service.ListingService;
@@ -10,16 +7,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
+
 
 import static java.time.LocalDateTime.now;
 import static org.springframework.http.HttpStatus.OK;

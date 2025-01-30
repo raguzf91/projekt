@@ -3,9 +3,11 @@ package hr.fina.student.projekt.service.impl;
 import hr.fina.student.projekt.dao.ListingDao;
 import hr.fina.student.projekt.entity.Listing;
 import hr.fina.student.projekt.entity.Photo;
+import hr.fina.student.projekt.mapper.UserDTOMapper;
 import hr.fina.student.projekt.request.ListingRequest;
 import hr.fina.student.projekt.service.AmenityService;
 import hr.fina.student.projekt.service.ListingService;
+import hr.fina.student.projekt.service.UserService;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +22,7 @@ import java.util.stream.Collectors;
 public class ListingServiceImpl implements ListingService {
     private final ListingDao listingDao;
     private final AmenityService amenityService;
-
+    private final UserService userService;
     @Override
     public List<Listing> getAllListings() {
         return listingDao.findAllListings();
@@ -42,6 +44,7 @@ public class ListingServiceImpl implements ListingService {
         try {
             Listing listing = Listing.builder()
             .title(listingRequest.getTitle())
+            .user(UserDTOMapper.fromUser(userService.findUserById((listingRequest.getUserId()))))
             .description(listingRequest.getDescription())
             .price(listingRequest.getPrice())
             .cleaningFee(listingRequest.getCleaningFee())

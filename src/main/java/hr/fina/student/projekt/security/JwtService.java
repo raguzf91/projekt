@@ -1,4 +1,5 @@
 package hr.fina.student.projekt.security;
+import java.util.ArrayList;
 import java.util.Date;
 import javax.crypto.SecretKey;
 
@@ -16,9 +17,11 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.UnsupportedJwtException;
@@ -35,7 +38,7 @@ import io.jsonwebtoken.Jwts.SIG;
 @Slf4j
 public class JwtService {
     private static final SecretKey SECRET_KEY = Jwts.SIG.HS256.key().build();
-    private static final String secretKeyString = Encoders.BASE64.encode(SECRET_KEY.getEncoded());
+    private static final String secretKeyString = "4ty0vsG5rV7cfDf6vtplXxt3Q6+uuxCXwfeMFfOrVGw=";
     //"4ty0vsG5rV7cfDf6vtplXxt3Q6+uuxCXwfeMFfOrVGw="; //TODO napravi ENV VARIJABLU
     //in case the clock on the parsing machine is not perfectly in sync with the clock on the machine that created the JWT
     private static final long SECONDS = 3 * 60;
@@ -62,7 +65,7 @@ public class JwtService {
             return Jwts.parser().clockSkewSeconds(SECONDS).verifyWith(getSigningKey()).build().parseSignedClaims(token).getPayload();
             
         } catch (JwtException e) {
-            throw new UnsupportedJwtException("False token");
+            throw new UnsupportedJwtException(e.getMessage());
         } 
         
                 
@@ -74,12 +77,9 @@ public class JwtService {
     }
 
     //TODO OVO PROVJERI
-    private Map<String, Object> getClaimsFromUser(UserPrincipal userPrincipal) {
-        List<String> claims = userPrincipal.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList();
-        HashMap<String, Object> claimsMap = new HashMap<>();
-        claimsMap.put("authorities", claims);
-
-        return claimsMap;
+    private List<String> getClaimsFromUser(UserPrincipal userPrincipal) {
+        List<String> claims = userPrincipal.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList());
+        return claims;
         
     } 
 
@@ -148,23 +148,29 @@ public class JwtService {
     }
 
     public List<GrantedAuthority> extractAuthorities(String token) {
-        log.info("Extracting authorities from the token");
-        try {
-            Claims claims = extractAllClaims(token);
-            List<?> authoritiesRaw = claims.get("authorities", List.class);
-            List<String> authorities = authoritiesRaw.stream()
-                .filter(String.class::isInstance)
-                .map(String.class::cast)
-                .collect(Collectors.toList());
-            return authorities.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList());
-        } catch (JwtException e) {
-            log.error("Error extracting authorities from token: {}", e.getMessage());
-            throw new UnsupportedJwtException("Invalid JWT token");
-        } catch (Exception e) {
-            log.error("Unexpected error extracting authorities from token: {}", token);
-            throw new RuntimeException("Unexpected error extracting authorities from token");
+    log.info("Extracting authorities from the token");
+    try {
+        Claims claims = extractAllClaims(token);
+        List<?> authoritiesRaw = claims.get("authorities", List.class);
+        List<GrantedAuthority> authorities = new ArrayList<>();
+        for (Object authority : authoritiesRaw) {
+            if (authority instanceof LinkedHashMap) {
+                LinkedHashMap<?, ?> authorityMap = (LinkedHashMap<?, ?>) authority;
+                String authorityName = (String) authorityMap.get("authority");
+                authorities.add(new SimpleGrantedAuthority(authorityName));
+            } else if (authority instanceof String) {
+                authorities.add(new SimpleGrantedAuthority((String) authority));
+            }
         }
+        return authorities;
+    } catch (JwtException e) {
+        log.error("Error extracting authorities from token: {}", e.getMessage());
+        throw new UnsupportedJwtException("Invalid JWT token");
+    } catch (Exception e) {
+        log.error("Unexpected error extracting authorities from token: {}", token);
+        throw new RuntimeException("Unexpected error extracting authorities from token");
     }
+}
 
     // Kreiramo neautentificiranog korisnika kojeg spring security autentificira
     //

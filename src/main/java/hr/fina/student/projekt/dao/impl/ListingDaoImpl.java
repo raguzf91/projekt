@@ -69,7 +69,7 @@ public class ListingDaoImpl implements ListingDao {
         """;
         try {
             List<Listing> listings = findListingsByUserId(id);
-            List<Double> ratings = getRatingsForAllListing(listings);
+           List<Double> ratings = getRatingsForAllListing(listings);
             
             Double averageRating = calculateAverageRatingScore(ratings);
             jdbc.update(INSERT_AVERAGE_RATING, Map.of("averageRating", averageRating, "id", id));
@@ -175,7 +175,13 @@ public class ListingDaoImpl implements ListingDao {
             reviews.stream().forEach(review -> review.setAuthor(userDao.findById(review.getUserId())));
             listing.setReviews(reviews);
             listing.setNumberOfReviews(reviews.size());
-            listing.setRating(calculateTotalReviewScore(reviews));
+            Double totalReviewScore = calculateTotalReviewScore(reviews);
+            if(totalReviewScore.isNaN()) {
+                listing.setRating(1.00);
+            } else {
+                listing.setRating(totalReviewScore);
+            }
+            
             jdbc.update(INSERT_LISTING_RATING, Map.of("rating", listing.getRating(), "id", id));
             listing.setLocation(findLocationByListingId(listing));
             listing.setUser(findUserByListingId(listing));
@@ -249,6 +255,7 @@ public class ListingDaoImpl implements ListingDao {
 
     private SqlParameterSource getSqlParameterSource(Listing listing) {
         return new MapSqlParameterSource()
+                .addValue("userId", listing.getUser().getId())
                 .addValue("title", listing.getTitle())
                 .addValue("description", listing.getDescription())
                 .addValue("price", listing.getPrice())
@@ -285,8 +292,8 @@ public class ListingDaoImpl implements ListingDao {
 
     private void insertLocation(Listing listing, Integer listingId) {
         final String INSERT_LOCATION = """
-            INSERT INTO locations (country, city, street, postal_code, longitude, latitude, listing_id) 
-            VALUES (:country, :city, :street, :postalCode, :longitude, :latitude, :listingId)
+            INSERT INTO locations (country, city, street, postal_code, longitude, latitude, listing_id, full_address) 
+            VALUES (:country, :city, :street, :postalCode, :longitude, :latitude, :listingId, :fullAddress)
         """;
         jdbc.update(INSERT_LOCATION, ((MapSqlParameterSource) getSqlParameterSource(listing.getLocation())).addValue("listingId", listingId));
     }
@@ -326,8 +333,8 @@ public class ListingDaoImpl implements ListingDao {
         try {
             log.info("Creating listing");
             final String INSERT_LISTING = """
-                INSERT INTO listings (title, description, price, cleaning_fee, refundable, maximum_guests, number_of_bedrooms, number_of_beds, number_of_bathrooms, type_of_listing) 
-                VALUES (:title, :description, :price, :cleaningFee, :refundable, :maxGuests, :numberOfBedrooms, :numberOfBeds, :numberOfBathrooms, :typeOfListing)
+                INSERT INTO listings (title, description, price, cleaning_fee, refundable, maximum_guests, number_of_bedrooms, number_of_beds, number_of_bathrooms, type_of_listing, user_id) 
+                VALUES (:title, :description, :price, :cleaningFee, :refundable, :maxGuests, :numberOfBedrooms, :numberOfBeds, :numberOfBathrooms, :typeOfListing, :userId)
             """;
             SqlParameterSource params = getSqlParameterSource(listing);
             KeyHolder holder = new GeneratedKeyHolder();

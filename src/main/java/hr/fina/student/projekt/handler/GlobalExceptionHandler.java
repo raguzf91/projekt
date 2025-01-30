@@ -17,6 +17,7 @@ import hr.fina.student.projekt.exceptions.user.AccountLockedException;
 import hr.fina.student.projekt.exceptions.user.UserAlreadyExistsException;
 import hr.fina.student.projekt.exceptions.user.UserUnauthorizedException;
 import hr.fina.student.projekt.utils.ExceptionResponse;
+import io.jsonwebtoken.JwtException;
 import jakarta.mail.MessagingException;
 import lombok.extern.slf4j.Slf4j;
 
@@ -145,6 +146,19 @@ public class GlobalExceptionHandler {
                     .build()
                 );
     }
+
+    @ExceptionHandler(JwtException.class)
+    public ResponseEntity<ExceptionResponse> handleException(JwtException ex) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(
+                    ExceptionResponse.builder()
+                    .error(ex.getMessage())
+                    .build()
+                );
+    }
+
+    
 
     
     

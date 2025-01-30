@@ -13,6 +13,8 @@ import jakarta.validation.constraints.NotBlank;
 public class ListingRequest implements Serializable{
     
     @NotBlank
+    private Integer userId;
+    @NotBlank
     private String title;
     @NotBlank
     private String description;
@@ -38,6 +40,8 @@ public class ListingRequest implements Serializable{
     private List<String> amenities;
     @NotBlank
     private Location fullLocation;
+
+    
 
 
     
