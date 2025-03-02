@@ -1,18 +1,32 @@
 package hr.fina.student.projekt.entity;
 import java.util.Collection;
+import java.util.Map;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.core.oidc.OidcIdToken;
+import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
+import org.springframework.security.oauth2.core.oidc.user.OidcUser;
+
 import lombok.RequiredArgsConstructor;
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toList;
 
 @RequiredArgsConstructor
-public class UserPrincipal implements UserDetails {
+public class UserPrincipal implements UserDetails, OidcUser {
     
     private final User user;
     private final Role role;
+    private final OidcIdToken oidcIdToken;
+    private final OidcUserInfo oidcUserInfo;
+
+    public UserPrincipal(User user, Role role) {
+        this.user = user;
+        this.role = role;
+        this.oidcIdToken = null;
+        this.oidcUserInfo = null;
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -53,6 +67,26 @@ public class UserPrincipal implements UserDetails {
 
     public Role getRole() {
         return this.role;
+    }
+    @Override
+    public Map<String, Object> getAttributes() {
+        return oidcUserInfo.getClaims();
+    }
+    @Override
+    public String getName() {
+        return this.user.getFirstName();
+    }
+    @Override
+    public Map<String, Object> getClaims() {
+        return oidcUserInfo.getClaims();
+    }
+    @Override
+    public OidcUserInfo getUserInfo() {
+        return this.oidcUserInfo;
+    }
+    @Override
+    public OidcIdToken getIdToken() {
+        return this.oidcIdToken;
     }
 
 

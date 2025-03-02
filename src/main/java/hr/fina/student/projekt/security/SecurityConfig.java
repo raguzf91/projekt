@@ -12,18 +12,21 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.oauth2.client.web.DefaultOAuth2AuthorizationRequestResolver;
+import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestResolver;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.cors.CorsConfiguration;
+import hr.fina.student.projekt.entity.UserPrincipal;
+import hr.fina.student.projekt.service.impl.CustomOidcUserService;
 
 @Configuration
 @EnableWebSecurity
@@ -36,7 +39,9 @@ public class SecurityConfig {
     private final BCryptPasswordEncoder encoder;
     private final UserDetailsService userDetailsService;
     private final LogoutHandler logoutHandler;
-    
+    private final ClientRegistrationRepository clientRegistrationRepository;
+    private final CustomOidcUserService customOauthUserService;
+    private final JwtService jwtService;
 /**
  * 
  * POST requests to /api/auth/**  are open to public, we allow unauthenticated user to access the login and register endpoint
@@ -51,7 +56,7 @@ public class SecurityConfig {
  public SecurityFilterChain securityFilterChain(HttpSecurity http)  throws Exception {
     http
         .csrf(AbstractHttpConfigurer::disable)
-        .cors(request -> new CorsConfiguration().applyPermitDefaultValues())
+        .cors(Customizer.withDefaults())
         .authorizeHttpRequests(authorize -> authorize
             .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.POST, "/api/auth/**")).permitAll()
             .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/api/auth/**")).permitAll()
@@ -61,6 +66,17 @@ public class SecurityConfig {
             .requestMatchers(HttpMethod.POST, "/api/listing/create").hasAuthority("CREATE:LISTING")          
 			.anyRequest().authenticated()               
 			)
+            .oauth2Login(oauth2 -> oauth2
+                .authorizationEndpoint(authorizationEndpoint ->
+                    authorizationEndpoint.authorizationRequestResolver(oauth2AuthorizationRequestResolver(clientRegistrationRepository))
+                )
+                .userInfoEndpoint(userInfoEndpoint -> userInfoEndpoint.oidcUserService(customOauthUserService))
+                .successHandler((request, response, authentication) -> {
+                    UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
+                    String token = jwtService.createAccessToken(userPrincipal);
+                    response.sendRedirect("http://localhost:5173?token=" + token);
+                })
+            )
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authenticationProvider(authenticationProvider())
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
@@ -92,5 +108,14 @@ public class SecurityConfig {
  public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
      return configuration.getAuthenticationManager();
  }
+
+ @Bean
+public OAuth2AuthorizationRequestResolver oauth2AuthorizationRequestResolver(ClientRegistrationRepository clientRegistrationRepository) {
+    DefaultOAuth2AuthorizationRequestResolver defaultResolver =
+            new DefaultOAuth2AuthorizationRequestResolver(clientRegistrationRepository, "/oauth2/authorization");
+    defaultResolver.setAuthorizationRequestCustomizer(customizer ->
+            customizer.additionalParameters(params -> params.put("prompt", "select_account")));
+    return defaultResolver;
+}
 
 }

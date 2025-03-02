@@ -282,11 +282,12 @@ public class ListingDaoImpl implements ListingDao {
             
     }
 
-    private SqlParameterSource getSqlParameterSource(Photo photo) {
+    private SqlParameterSource getSqlParameterSource(Photo photo, Integer userId) {
         return new MapSqlParameterSource()
             .addValue("photoUrl", photo.getPhotoUrl())
             .addValue("name", photo.getName())
-            .addValue("bedroomPhoto", photo.getBedroomPhoto());
+            .addValue("bedroomPhoto", photo.getBedroomPhoto())
+            .addValue("userId", userId);
     }
 
 
@@ -300,16 +301,18 @@ public class ListingDaoImpl implements ListingDao {
 
     private void insertPhotos(List<Photo> photos, Integer listingId) {
         final String INSERT_PHOTO = """
-            INSERT INTO photos (photo_url, name, bedroom_photo) 
-            VALUES (:photoUrl, :name, :bedroomPhoto)
+            INSERT INTO photos (photo_url, name, bedroom_photo, user_id) 
+            VALUES (:photoUrl, :name, :bedroomPhoto, :userId)
         """;
         final String INSERT_LISTING_PHOTO = """
             INSERT INTO listingphotos (listing_id, photo_id) 
             VALUES (:listingId, :photoId)
         """;
+        Listing listing = findListing(listingId);
+        Integer userId = listing.getUser().getId();
         for(Photo photo : photos) {
             KeyHolder holder = new GeneratedKeyHolder();
-            jdbc.update(INSERT_PHOTO, getSqlParameterSource(photo), holder, new String[] {"id"});
+            jdbc.update(INSERT_PHOTO, getSqlParameterSource(photo, userId), holder, new String[] {"id"});
             Integer photoId = (Integer)holder.getKey();
             jdbc.update(INSERT_LISTING_PHOTO, Map.of("listingId", listingId, "photoId", photoId));
         }

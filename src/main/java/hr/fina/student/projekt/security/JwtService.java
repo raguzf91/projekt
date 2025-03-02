@@ -108,6 +108,8 @@ public class JwtService {
         return Jwts
             .builder()
             .claim("authorities", getClaimsFromUser(user)) // mozda radi idk, VJV NE 
+            .claim("role", user.getRole().getName())
+            .claim("id", user.getUser().getId())
             .issuer("Filip")
             .subject(user.getUsername())
             .issuedAt(new Date(System.currentTimeMillis()))
