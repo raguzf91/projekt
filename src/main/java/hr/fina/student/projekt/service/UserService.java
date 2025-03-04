@@ -16,4 +16,5 @@ public interface UserService {
     Double getAverageRatingScore(Integer id);
     Integer getNumberOfReviews(Integer id);
     List<Review> getReviews(Integer id);
+    Boolean updateUser(Integer id, String details);
 }

@@ -13,9 +13,16 @@ import hr.fina.student.projekt.exceptions.key.InvalidKeyException;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import hr.fina.student.projekt.service.EmailService;
 import hr.fina.student.projekt.service.ListingService;
@@ -54,7 +61,7 @@ public class UserServiceImpl implements UserService {
         User user = verifyCode(email, key);
         user.setEnabled(true);
         user.setAccountLocked(false);
-        userRepository.updateUser(user);
+        userRepository.enableUser(user);
         
     }
 
@@ -63,7 +70,7 @@ public class UserServiceImpl implements UserService {
         log.info("Verifying account");
         User user = verifyCode(email, key);
        
-        userRepository.updateUser(user);
+        userRepository.enableUser(user);
     }
 
      public void sendEmail(User user, String url, String emailType ) throws MessagingException {
@@ -164,6 +171,87 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<Review> getReviews(Integer id) {
         return userRepository.findAllReviews(id);
+    }
+
+    @Override
+    public Boolean updateUser(Integer id, String details) {
+        User user = findUserById(id);
+        try {
+            Map<String, Object> detailsMap = new ObjectMapper().readValue(details, new TypeReference<Map<String, Object>>() {});
+            log.debug(detailsMap.toString());
+            if (detailsMap.containsKey("firstName")) {
+                user.setFirstName((String) detailsMap.get("firstName"));
+            } else {
+                user.setFirstName(user.getFirstName());
+            }
+
+            if (detailsMap.containsKey("lastName")) {
+                user.setLastName((String) detailsMap.get("lastName"));
+            } else {
+                user.setLastName(user.getLastName());
+            }
+
+            if (detailsMap.containsKey("email")) {
+                user.setEmail((String) detailsMap.get("email"));
+            } else {
+                user.setEmail(user.getEmail());
+            }
+
+            if (detailsMap.containsKey("phoneNumber")) {
+                user.setPhoneNumber((String) detailsMap.get("phoneNumber"));
+            } else {
+                user.setPhoneNumber(user.getPhoneNumber());
+            }
+
+            if (detailsMap.containsKey("profilePhoto")) {
+                user.setProfilePhoto((String) detailsMap.get("profilePhoto"));
+            } else {
+                user.setProfilePhoto(user.getProfilePhoto());
+            }
+
+            if (detailsMap.containsKey("bio")) {
+                user.setBio((String) detailsMap.get("bio"));
+            } else {
+                user.setBio(user.getBio());
+            }
+
+            if (detailsMap.containsKey("city")) {
+                user.setCity((String) detailsMap.get("city"));
+            } else {
+                user.setCity(user.getCity());
+            }
+
+            if (detailsMap.containsKey("country")) {
+                user.setCountry((String) detailsMap.get("country"));
+            } else {
+                user.setCountry(user.getCountry());
+            }
+            
+           
+            if (detailsMap.containsKey("speaksLanguages")) {
+                List<?> speaksLangs = (List<?>) detailsMap.get("speaksLanguages");
+                String[] languageArray = speaksLangs.stream()
+                    .filter(String.class::isInstance)
+                    .map(String.class::cast)
+                    .toArray(String[]::new);
+                user.setSpeaksLanguages(languageArray);
+            } else {
+                user.setSpeaksLanguages(user.getSpeaksLanguages());
+            }
+
+            
+           
+            userRepository.updateUser(user);
+        } catch (JsonMappingException jsonMappingException) {
+            throw new RuntimeException("Error mapping user details");
+        } catch (JsonProcessingException jsonProcessingException) {
+            throw new RuntimeException("Error processing user details");
+        } catch (Exception e) {
+            return false;
+        }
+        
+        Assert.notNull(user, "User not found");
+        return userRepository.updateUser(user);
     }
 
     

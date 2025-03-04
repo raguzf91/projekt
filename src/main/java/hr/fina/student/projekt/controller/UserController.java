@@ -11,10 +11,14 @@ import hr.fina.student.projekt.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import static java.time.LocalDateTime.now;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.OK;
 import java.util.Map;
 import org.springframework.web.bind.annotation.RequestParam;
 import static java.lang.Integer.parseInt;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+
 
 
 @RestController
@@ -39,15 +43,41 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<HttpResponse> getMethodName(@PathVariable("id") Integer id) {
+    public ResponseEntity<HttpResponse> getUser(@PathVariable("id") Integer id) {
         return ResponseEntity.ok().body(
                 HttpResponse.builder()
                         .data(Map.of("user", userService.findUserById((id))))
-                        .message("Reviews fetched successfully")
+                        .message("User fetched successfully")
                         .status(OK)
                         .statusCode(OK.value())
                         .build()
         );
     }
+
+    @PutMapping("/{id}/edit-profile")
+    public ResponseEntity<HttpResponse> editProfile(@PathVariable String id, @RequestBody String userDetails) {
+        if(userService.updateUser(Integer.parseInt(id), userDetails)) {
+            return ResponseEntity.ok().body(
+                HttpResponse.builder()
+                        .timeStamp(now().toString())
+                        .message("User profile updated successfully")
+                        .status(OK)
+                        .statusCode(OK.value())
+                        .build()
+            );
+        } else {
+            return ResponseEntity.internalServerError().body(
+                HttpResponse.builder()
+                        .timeStamp(now().toString())
+                        .message("Problem occured in editing profile")
+                        .status(INTERNAL_SERVER_ERROR)
+                        .statusCode(INTERNAL_SERVER_ERROR.value())
+                        .build()
+            );
+        }
+
+        }
+        
+       
     
 }

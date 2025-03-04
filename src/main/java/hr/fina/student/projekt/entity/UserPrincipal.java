@@ -9,6 +9,9 @@ import org.springframework.security.oauth2.core.oidc.OidcIdToken;
 import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import io.jsonwebtoken.lang.Collections;
 import lombok.RequiredArgsConstructor;
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toList;
@@ -68,22 +71,32 @@ public class UserPrincipal implements UserDetails, OidcUser {
     public Role getRole() {
         return this.role;
     }
+
+    @JsonIgnore
     @Override
     public Map<String, Object> getAttributes() {
-        return oidcUserInfo.getClaims();
+
+        return (this.oidcUserInfo == null ? Collections.emptyMap()  : this.oidcUserInfo.getClaims());
     }
+
     @Override
     public String getName() {
         return this.user.getFirstName();
     }
+
+    @JsonIgnore
     @Override
     public Map<String, Object> getClaims() {
-        return oidcUserInfo.getClaims();
+        return (oidcUserInfo == null) ? Collections.emptyMap() : oidcUserInfo.getClaims();
     }
+
+    @JsonIgnore
     @Override
     public OidcUserInfo getUserInfo() {
         return this.oidcUserInfo;
     }
+
+    @JsonIgnore
     @Override
     public OidcIdToken getIdToken() {
         return this.oidcIdToken;

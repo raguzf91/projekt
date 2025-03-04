@@ -62,6 +62,8 @@ public class UserRowMapper implements RowMapper<User> {
             .accountLocked(rs.getBoolean("account_locked"))
             .createdAt(rs.getTimestamp("created_at").toLocalDateTime())
             .updatedAt(rs.getTimestamp("updated_at").toLocalDateTime())
+            .country(rs.getString("country"))
+            .city(rs.getString("city"))
             .build();
     }
 }

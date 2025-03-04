@@ -81,6 +81,7 @@ public class UserDaoImpl implements UserDao<User>, UserDetailsService {
 
     private SqlParameterSource getSqlParameterSource(User user) {
         return new MapSqlParameterSource()
+            .addValue("id", user.getId())
             .addValue("firstName", user.getFirstName())
             .addValue("lastName", user.getLastName())
             .addValue("password", encoder.encode(user.getPassword()))
@@ -89,8 +90,12 @@ public class UserDaoImpl implements UserDao<User>, UserDetailsService {
             .addValue("dateOfBirth", user.getDateOfBirth())
             .addValue("phoneNumber", user.getPhoneNumber())
             .addValue("accountLocked", user.isAccountLocked())
-            .addValue("enabled", user.isEnabled());
-            //.addValue("speaksLanguages", user.getSpeaksLanguages());
+            .addValue("enabled", user.isEnabled())
+            .addValue("city", user.getCity())
+            .addValue("country", user.getCountry())
+            .addValue("profilePhoto", user.getProfilePhoto())
+            .addValue("bio", user.getBio())
+            .addValue("speaksLanguages", user.getSpeaksLanguages());
     }
 
     @Override
@@ -123,11 +128,12 @@ public class UserDaoImpl implements UserDao<User>, UserDetailsService {
     }
 
     @Override
-    public Boolean updateUser(User user) {
+    public Boolean enableUser(User user) {
         final String UPDATE_USER = """
                 UPDATE Users SET account_locked = :accountLocked, enabled = :enabled WHERE id = :id
                 """;
         try {
+            
             jdbcTemplate.update(UPDATE_USER, Map.of("accountLocked", user.isAccountLocked() , "enabled", user.isEnabled(), "id", user.getId()));
             return true;
         } catch (Exception e) {
@@ -209,6 +215,21 @@ public class UserDaoImpl implements UserDao<User>, UserDetailsService {
                 throw new DatabaseException("An error occured in finding all reviews");
             }
         }
+
+
+    @Override
+    public Boolean updateUser(User user) {
+        final String UPDATE_USER = """
+                UPDATE users SET first_name = :firstName, last_name = :lastName, email = :email, password = :password,  city = :city, country = :country, phone_number = :phoneNumber, profile_photo = :profilePhoto, bio = :bio, speaks_languages = :speaksLanguages WHERE id = :id
+                """;
+        try {
+            jdbcTemplate.update(UPDATE_USER, getSqlParameterSource(user));
+            return true;
+        } catch (DatabaseException e) {
+            log.error("Error updating user: " + e.getCause());
+            throw new DatabaseException("An error occured in updating the user");
+        }
+    }
 
     
 

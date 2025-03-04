@@ -42,8 +42,8 @@ public class JwtService {
     //"4ty0vsG5rV7cfDf6vtplXxt3Q6+uuxCXwfeMFfOrVGw="; //TODO napravi ENV VARIJABLU
     //in case the clock on the parsing machine is not perfectly in sync with the clock on the machine that created the JWT
     private static final long SECONDS = 3 * 60;
-    private static final long ACCESS_TOKEN_EXPIRATION_TIME = 1_800_000; // 30 minuta 
-    private static final long REFRESH_TOKEN_EXPIRATION_TIME = 3_600_000; // 60 minuta
+    private static final long ACCESS_TOKEN_EXPIRATION_TIME = 10_800_000; // 30 minuta 
+    private static final long REFRESH_TOKEN_EXPIRATION_TIME = 30_600_000; // 60 minuta
 
 
     public String extractUsername(String jwtToken) {
