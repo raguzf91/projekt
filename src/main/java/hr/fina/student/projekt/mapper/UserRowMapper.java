@@ -64,6 +64,7 @@ public class UserRowMapper implements RowMapper<User> {
             .updatedAt(rs.getTimestamp("updated_at").toLocalDateTime())
             .country(rs.getString("country"))
             .city(rs.getString("city"))
+            .oauth2User(rs.getBoolean("oauth2_user"))
             .build();
     }
 }

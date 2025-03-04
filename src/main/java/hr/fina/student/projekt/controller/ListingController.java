@@ -85,4 +85,30 @@ public class ListingController {
         );
     }
 
+    @PostMapping("/{id}/booking")
+    public ResponseEntity<HttpResponse> bookListing(@PathVariable("id") Integer id, @RequestBody String reservationDetails) {
+        listingService.bookListing(id, reservationDetails);
+        return ResponseEntity.ok().body(
+                HttpResponse.builder()
+                        .timeStamp(now().toString())
+                        .message("Listing booked successfully")
+                        .status(OK)
+                        .statusCode(OK.value())
+                        .build()
+        );
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<HttpResponse> deleteListing(@PathVariable("id") Integer id) {
+        listingService.deleteListing(id);
+        return ResponseEntity.ok().body(
+                HttpResponse.builder()
+                        .timeStamp(now().toString())
+                        .message("Listing deleted successfully")
+                        .status(OK)
+                        .statusCode(OK.value())
+                        .build()
+        );
+    }
+
 }

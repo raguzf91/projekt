@@ -72,6 +72,7 @@ public class CustomOidcUserService extends OidcUserService {
        .phoneNumber(phoneNumber)
        .dateOfBirth(birthDate)
        .gender(gender)
+       .oauth2User(true)
        .build();
        user = userService.createUser(user);
        Role role = roleService.getRoleByUserId(user.getId());

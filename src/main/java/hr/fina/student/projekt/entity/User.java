@@ -30,6 +30,7 @@ public class User extends BaseEntity {
     private Double averageRating;
     private String city;
     private String country;
+    private Boolean oauth2User;
     
 
 

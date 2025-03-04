@@ -16,8 +16,10 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Repository;
 
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -187,7 +189,6 @@ public class ListingDaoImpl implements ListingDao {
             listing.setUser(findUserByListingId(listing));
             listing.setPhotos(findPhotosByListingId(listing));
             listing.setAmenities(findAmenitiesByListingId(id));
-
             return listing;
         } catch (Exception e) {
             log.error("Error fetching listing by id {}", id);
@@ -352,6 +353,36 @@ public class ListingDaoImpl implements ListingDao {
         } catch (Exception e) {
             log.error("Error creating listing", e.getCause());
             throw new DatabaseException("An error has occurred in creating listing");
+        }
+    }
+
+    @Override
+    public void bookListing(Integer listingId, Integer userId, Date checkIn, Date checkOut, Double paymentAmount,
+            Integer numberOfGuests) {
+       try {
+            log.info("Booking listing");
+            final String INSERT_RESERVATION = """
+                INSERT INTO reservations (reserved_from, reserved_until, user_id, listing_id, payment_amount, number_of_guests) 
+                VALUES (:checkIn, :checkOut, :userId, :listingId, :paymentAmount, :numberOfGuests)
+            """;
+            jdbc.update(INSERT_RESERVATION, Map.of("checkIn", checkIn, "checkOut", checkOut, "userId", userId, "listingId", listingId, "paymentAmount", paymentAmount, "numberOfGuests", numberOfGuests));
+        } catch (Exception e) {
+            log.error("Error booking listing", e.getCause());
+            throw new DatabaseException("An error has occurred in booking listing");
+       }
+    }
+
+    @Override
+    public void deleteListing(Integer listingId) {
+        try {
+            log.info("Deleting listing");
+            final String DELETE_LISTING = """
+                DELETE FROM listings WHERE id = :listingId
+            """;
+            jdbc.update(DELETE_LISTING, Map.of("listingId", listingId));
+        } catch (Exception e) {
+            log.error("Error deleting listing", e.getCause());
+            throw new DatabaseException("An error has occurred in deleting listing");
         }
     }
 

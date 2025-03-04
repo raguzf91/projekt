@@ -34,9 +34,9 @@ public class Listing extends BaseEntity {
     private Integer maxGuests;
     private Integer numberOfReviews;
     private String typeOfListing;
-
     private Integer numberOfBathrooms;
     private Double cleaningFee;
+    private Boolean isOwnerListing;
 
 
    

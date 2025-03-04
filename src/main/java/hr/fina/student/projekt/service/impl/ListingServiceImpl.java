@@ -13,7 +13,17 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -72,6 +82,69 @@ public class ListingServiceImpl implements ListingService {
       
 
     }
+
+    @Override
+    public void bookListing(Integer listingId, String reservationDetails) {
+        try {
+            Map<String, Object> detailsMap = new ObjectMapper().readValue(reservationDetails, new TypeReference<Map<String, Object>>() {});
+            log.debug(detailsMap.toString());
+
+            Object checkInObj = detailsMap.get("checkIn");
+            Date checkIn;
+            if (checkInObj instanceof String) {
+                String s = (String) checkInObj;
+                // If the string contains non-digits, parse using a formatter
+                if (!s.matches("\\d+")) {
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+                    LocalDate localDate = LocalDate.parse(s, formatter);
+                    checkIn = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+                } else {
+                    checkIn = new Date(Long.parseLong(s));
+                }
+            } else {
+                checkIn = new Date((Long) checkInObj);
+            }
+            Object checkOutObj = detailsMap.get("checkOut");
+            Date checkOut;
+            if (checkOutObj instanceof String) {
+                String s = (String) checkOutObj;
+                // If the string contains non-digits, parse using a formatter
+                if (!s.matches("\\d+")) {
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+                    LocalDate localDate = LocalDate.parse(s, formatter);
+                    checkOut = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+                } else {
+                    checkOut = new Date(Long.parseLong(s));
+                }
+            } else {
+                checkOut = new Date((Long) checkInObj);
+            }
+            Integer userId = (Integer) detailsMap.get("userId");
+            Object paymentAmountObj = detailsMap.get("paymentAmount");
+            Double paymentAmount = paymentAmountObj instanceof Integer ? ((Integer) paymentAmountObj).doubleValue() : (Double) paymentAmountObj;
+            Integer numberOfGuests = Integer.valueOf( (String) detailsMap.get("numberOfGuests"));
+            listingDao.bookListing(listingId, userId, checkIn, checkOut, paymentAmount, numberOfGuests);
+
+        } catch (JsonMappingException jsonMappingException) {
+            throw new RuntimeException("Error mapping user details");
+        } catch (JsonProcessingException jsonProcessingException) {
+            throw new RuntimeException("Error processing user details");
+        } catch (Exception e) {
+            throw new RuntimeException("Error booking listing");
+        }
+    }
+
+    @Override
+    public void deleteListing(Integer listingId) {
+        try {
+            listingDao.deleteListing(listingId);
+        } catch (Exception e) {
+            throw new RuntimeException("Error deleting listing");
+        }
+    }
+        
+
+   
 
 
 }

@@ -31,6 +31,7 @@ public class UserDTOMapper {
                 .country(user.getCountry() != null ? user.getCountry() : "")
                 .roleName(role.getName())
                 .permissions(role.getPermission())
+                .oauth2User(user.getOauth2User())
                 .build();
     }
 

@@ -63,6 +63,7 @@ public class SecurityConfig {
             .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/api/listing/**")).permitAll()
             .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/api/amenity/**")).permitAll()
             .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/api/user/**")).permitAll().requestMatchers(HttpMethod.OPTIONS,"/**").permitAll()
+            
             .requestMatchers(HttpMethod.POST, "/api/listing/create").hasAuthority("CREATE:LISTING")          
 			.anyRequest().authenticated()               
 			)

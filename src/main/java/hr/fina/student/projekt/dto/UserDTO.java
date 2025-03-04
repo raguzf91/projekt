@@ -37,5 +37,6 @@ public class UserDTO {
     private String permissions;
     private String city;
     private String country;
+    private Boolean oauth2User;
 
 }

@@ -53,11 +53,14 @@ public class UserDaoImpl implements UserDao<User>, UserDetailsService {
        }
        // save new user
        try {
+        
+        user.setOauth2User(false);
         log.info("Saving user: {"+ user.getEmail()+"}");
         KeyHolder holder = new GeneratedKeyHolder();
         SqlParameterSource params = getSqlParameterSource(user);
         user.setEnabled(false);
         user.setAccountLocked(true);
+        
         jdbcTemplate.update(SAVE_USER_QUERY, params, holder, new String [] {"id"});
 
         // podstavi id korisniku iz holdera
@@ -95,7 +98,8 @@ public class UserDaoImpl implements UserDao<User>, UserDetailsService {
             .addValue("country", user.getCountry())
             .addValue("profilePhoto", user.getProfilePhoto())
             .addValue("bio", user.getBio())
-            .addValue("speaksLanguages", user.getSpeaksLanguages());
+            .addValue("speaksLanguages", user.getSpeaksLanguages())
+            .addValue("oauth2User", user.getOauth2User());	
     }
 
     @Override
