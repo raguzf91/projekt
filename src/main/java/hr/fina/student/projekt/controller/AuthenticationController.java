@@ -159,7 +159,8 @@ public class AuthenticationController{
             UserPrincipal loggedInUser = getLoggedInUser(authentication);
             log.info("User role" + loggedInUser.getRole());
             return loggedInUser;
-        } catch (Exception e) {
+        } catch (BadCredentialsException e) {
+            log.info(e.getMessage());
             log.error("Error authenticating user with email: " + email);
            throw new BadCredentialsException("Pogrešni email ili lozinka");
         }

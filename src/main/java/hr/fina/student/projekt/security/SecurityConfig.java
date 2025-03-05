@@ -89,6 +89,7 @@ public class SecurityConfig {
                     (request, response, authentication) -> {
                         SecurityContextHolder.clearContext();
                         response.setStatus(200);
+
                     }
                 )
             );

@@ -2,10 +2,13 @@ package hr.fina.student.projekt.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import hr.fina.student.projekt.entity.Reservation;
 import hr.fina.student.projekt.response.HttpResponse;
 import hr.fina.student.projekt.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +16,8 @@ import lombok.extern.slf4j.Slf4j;
 import static java.time.LocalDateTime.now;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.OK;
+
+import java.util.List;
 import java.util.Map;
 import org.springframework.web.bind.annotation.RequestParam;
 import static java.lang.Integer.parseInt;
@@ -77,7 +82,51 @@ public class UserController {
         }
 
         }
+
+        @GetMapping("/{id}/reservations")
+        public ResponseEntity<HttpResponse> getReservations(@PathVariable("id") Integer id) {
+            return ResponseEntity.ok().body(
+                    HttpResponse.builder()
+                            .timeStamp(now().toString())
+                            .data(Map.of("reservations", userService.findReservationsByUserId(id)))
+                            .message("Reservations fetched successfully")
+                            .status(OK)
+                            .statusCode(OK.value())
+                            .build()
+            );
+        }
+
+        @DeleteMapping("/{id}/reservations/{reservationId}")
+        public ResponseEntity<HttpResponse> deleteReservation(@PathVariable("id") Integer id, @PathVariable("reservationId") Integer reservationId) {
+            List<Reservation> reservations = userService.deleteReservation(reservationId, id); 
+                return ResponseEntity.ok().body(
+                    HttpResponse.builder()
+                            .timeStamp(now().toString())
+                            .data(Map.of("reservations", reservations))
+                            .message("Reservation deleted successfully")
+                            .status(OK)
+                            .statusCode(OK.value())
+                            .build()
+                );
+         
+            }
+        
+            @GetMapping("/{id}/reservations/listing/{listingId}")
+            public ResponseEntity<HttpResponse> getReservation(@PathVariable("id") Integer id, @PathVariable("listingId") Integer listingId) {
+                return ResponseEntity.ok().body(
+                        HttpResponse.builder()
+                                .timeStamp(now().toString())
+                                .data(Map.of("isReserved", userService.findReservation(listingId, id)))
+                                .message("Reservation fetched successfully")
+                                .status(OK)
+                                .statusCode(OK.value())
+                                .build()
+                );
+            }
+        
+        
+        }
         
        
     
-}
+

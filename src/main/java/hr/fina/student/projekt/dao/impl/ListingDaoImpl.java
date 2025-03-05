@@ -362,10 +362,10 @@ public class ListingDaoImpl implements ListingDao {
        try {
             log.info("Booking listing");
             final String INSERT_RESERVATION = """
-                INSERT INTO reservations (reserved_from, reserved_until, user_id, listing_id, payment_amount, number_of_guests) 
-                VALUES (:checkIn, :checkOut, :userId, :listingId, :paymentAmount, :numberOfGuests)
+                INSERT INTO reservations (reserved_from, reserved_until, user_id, listing_id, payment_amount, number_of_guests, canceled) 
+                VALUES (:checkIn, :checkOut, :userId, :listingId, :paymentAmount, :numberOfGuests, :canceled)
             """;
-            jdbc.update(INSERT_RESERVATION, Map.of("checkIn", checkIn, "checkOut", checkOut, "userId", userId, "listingId", listingId, "paymentAmount", paymentAmount, "numberOfGuests", numberOfGuests));
+            jdbc.update(INSERT_RESERVATION, Map.of("checkIn", checkIn, "checkOut", checkOut, "userId", userId, "listingId", listingId, "paymentAmount", paymentAmount, "numberOfGuests", numberOfGuests, "canceled", false));
         } catch (Exception e) {
             log.error("Error booking listing", e.getCause());
             throw new DatabaseException("An error has occurred in booking listing");

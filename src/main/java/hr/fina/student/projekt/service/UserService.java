@@ -1,9 +1,8 @@
 package hr.fina.student.projekt.service;
 import java.util.List;
-
-import hr.fina.student.projekt.dto.UserDTO;
 import hr.fina.student.projekt.entity.Review;
 import hr.fina.student.projekt.entity.User;
+import hr.fina.student.projekt.entity.Reservation;
 import jakarta.mail.MessagingException;
 
 public interface UserService {
@@ -17,4 +16,7 @@ public interface UserService {
     Integer getNumberOfReviews(Integer id);
     List<Review> getReviews(Integer id);
     Boolean updateUser(Integer id, String details);
+    List<Reservation> findReservationsByUserId(Integer id);
+    List<Reservation> deleteReservation(Integer reservationId, Integer userId);
+    Boolean findReservation(Integer listingId, Integer userId);
 }

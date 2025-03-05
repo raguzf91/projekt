@@ -15,6 +15,7 @@ import org.springframework.stereotype.Repository;
 import hr.fina.student.projekt.dao.ListingDao;
 import hr.fina.student.projekt.dao.UserDao;
 import hr.fina.student.projekt.entity.Listing;
+import hr.fina.student.projekt.entity.Reservation;
 import hr.fina.student.projekt.entity.Review;
 import hr.fina.student.projekt.entity.User;
 import hr.fina.student.projekt.entity.UserPrincipal;
@@ -31,6 +32,7 @@ import hr.fina.student.projekt.exceptions.database.DatabaseException;
 import hr.fina.student.projekt.exceptions.user.UserAlreadyExistsException;
 import hr.fina.student.projekt.mapper.UserRowMapper;
 import hr.fina.student.projekt.mapper.ReviewRowMapper;
+import hr.fina.student.projekt.mapper.ReservationRowMapper;
 
 @Repository
 @RequiredArgsConstructor
@@ -234,6 +236,11 @@ public class UserDaoImpl implements UserDao<User>, UserDetailsService {
             throw new DatabaseException("An error occured in updating the user");
         }
     }
+
+
+
+
+   
 
     
 

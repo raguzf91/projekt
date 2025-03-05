@@ -2,6 +2,7 @@ package hr.fina.student.projekt.dao;
 
 import org.springframework.dao.DataAccessException;
 
+import hr.fina.student.projekt.entity.Reservation;
 import hr.fina.student.projekt.entity.Review;
 import hr.fina.student.projekt.entity.Token;
 import hr.fina.student.projekt.entity.User;

@@ -1,8 +1,10 @@
 package hr.fina.student.projekt.service.impl;
 
 import hr.fina.student.projekt.dao.ListingDao;
+import hr.fina.student.projekt.dao.ReservationDao;
 import hr.fina.student.projekt.dao.TokenDao;
 import hr.fina.student.projekt.dao.UserDao;
+import hr.fina.student.projekt.entity.Reservation;
 import hr.fina.student.projekt.entity.Review;
 import hr.fina.student.projekt.entity.Token;
 import hr.fina.student.projekt.entity.User;
@@ -40,6 +42,7 @@ public class UserServiceImpl implements UserService {
     private final TokenDao activationTokenRepository;
     private final EmailService emailService;
     private final ListingDao listingDao;
+    private final ReservationDao reservationsDao;
 
     @Override
     public User createUser(User user) {
@@ -252,6 +255,21 @@ public class UserServiceImpl implements UserService {
         
         Assert.notNull(user, "User not found");
         return userRepository.updateUser(user);
+    }
+
+    @Override
+    public List<Reservation> findReservationsByUserId(Integer id) {
+        return reservationsDao.findReservationsByUserId(id); 
+    }
+
+    @Override
+    public List<Reservation> deleteReservation(Integer reservationId, Integer userId) {
+        return reservationsDao.deleteReservation(reservationId, userId);
+    }
+
+    @Override
+    public Boolean findReservation(Integer listingId, Integer userId) {
+        return reservationsDao.findReservation(listingId, userId);
     }
 
     
