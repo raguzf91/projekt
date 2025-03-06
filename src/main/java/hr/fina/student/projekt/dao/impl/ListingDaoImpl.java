@@ -38,7 +38,7 @@ public class ListingDaoImpl implements ListingDao {
     private final AmenityDao amenityDao;
 
     public List<Listing> findAllListings() {
-        try {
+        try {            
             log.info("Fetching all listings");
             final String FIND_ALL_LISTINGS = "SELECT id, type_of_listing, rating, user_id, price FROM listings";
             List<Listing> listings = jdbc.query(FIND_ALL_LISTINGS, new ListingSecondRowMapper());
@@ -213,6 +213,9 @@ public class ListingDaoImpl implements ListingDao {
         """;
 
            
+            if(category.equals("Sve")) {
+                return findAllListings();
+            }
 
             List<Listing> listings = jdbc.query(FIND_LISTING_BY_CATEGORY, Map.of("category", category), new ListingSecondRowMapper());
 
