@@ -1,8 +1,12 @@
 package hr.fina.student.projekt.service.impl;
 
 import hr.fina.student.projekt.dao.ListingDao;
+import hr.fina.student.projekt.dao.UserDao;
+import hr.fina.student.projekt.dto.ListingFilter;
+import hr.fina.student.projekt.entity.Amenity;
 import hr.fina.student.projekt.entity.Listing;
 import hr.fina.student.projekt.entity.Photo;
+import hr.fina.student.projekt.entity.User;
 import hr.fina.student.projekt.mapper.UserDTOMapper;
 import hr.fina.student.projekt.request.ListingRequest;
 import hr.fina.student.projekt.service.AmenityService;
@@ -141,6 +145,42 @@ public class ListingServiceImpl implements ListingService {
         } catch (Exception e) {
             throw new RuntimeException("Error deleting listing");
         }
+    }
+
+    @Override
+    public List<Listing> getListingsByFilter(Map<String, String> filters) {
+        ListingFilter listingFilter = new ListingFilter();
+        if(filters.get("minimalPrice") != null) {
+            listingFilter.setMinimalPrice(Integer.parseInt(filters.get("minimalPrice")));
+        }
+        if(filters.get("maximalPrice") != null) {
+            listingFilter.setMaximalPrice(Integer.parseInt(filters.get("maximalPrice")));
+        }
+        if(filters.get("bedrooms") != null) {
+            listingFilter.setBedrooms(Integer.parseInt(filters.get("bedrooms")));
+        }
+        if(filters.get("beds") != null) {
+            listingFilter.setBeds(Integer.parseInt(filters.get("beds")));
+        }
+        if(filters.get("bathrooms") != null) {
+            listingFilter.setBathrooms(Integer.parseInt(filters.get("bathrooms")));
+        }
+        if(filters.get("location") != null) {
+            listingFilter.setLocation(filters.get("location"));
+        }
+        if(filters.get("typeOfListing") != null) {
+            listingFilter.setTypeOfListing(filters.get("typeOfListing"));
+        }
+        if(filters.get("amenities") != null) {
+            listingFilter.setAmenities(List.of(filters.get("amenities").split(",")));
+        }
+        if(filters.get("speaksLanguages") != null) {
+            listingFilter.setSpeaksLanguages(List.of(filters.get("speaksLanguages").split(",")));
+        }
+        return listingDao.findListingsByFilter(listingFilter);
+        
+
+            
     }
         
 

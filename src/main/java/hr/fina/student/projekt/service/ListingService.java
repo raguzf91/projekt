@@ -5,6 +5,7 @@ import hr.fina.student.projekt.request.ListingRequest;
 
 import java.sql.Date;
 import java.util.List;
+import java.util.Map;
 
 public interface ListingService {
     public List<Listing> getAllListings();
@@ -13,4 +14,5 @@ public interface ListingService {
     void createListing(ListingRequest listingRequest);
     void bookListing(Integer listingId, String reservationDetails);
     void deleteListing(Integer listingId);
+    List<Listing> getListingsByFilter(Map<String, String> filters);
 }

@@ -15,6 +15,9 @@ import java.util.Map;
 
 import static java.time.LocalDateTime.now;
 import static org.springframework.http.HttpStatus.OK;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 
 @RestController
@@ -110,5 +113,20 @@ public class ListingController {
                         .build()
         );
     }
+
+    @GetMapping("/filter")
+    public ResponseEntity<HttpResponse> fetchListingsByFilter(@RequestParam Map<String, String> params) {
+        Map<String, String> filterParams = params;
+        List<Listing> listings = listingService.getListingsByFilter(filterParams);
+        return ResponseEntity.ok().body(
+                HttpResponse.builder()
+                        .timeStamp(now().toString())
+                        .data(Map.of("listings", listings))
+                        .status(OK)
+                        .statusCode(OK.value())
+                        .build()
+        );
+    }
+    
 
 }

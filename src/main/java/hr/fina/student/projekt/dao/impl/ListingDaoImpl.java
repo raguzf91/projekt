@@ -4,6 +4,7 @@ import hr.fina.student.projekt.dao.AmenityDao;
 import hr.fina.student.projekt.dao.ListingDao;
 import hr.fina.student.projekt.dao.LocationDao;
 import hr.fina.student.projekt.dao.UserDao;
+import hr.fina.student.projekt.dto.ListingFilter;
 import hr.fina.student.projekt.dto.UserDTO;
 import hr.fina.student.projekt.entity.*;
 import hr.fina.student.projekt.exceptions.database.DatabaseException;
@@ -11,6 +12,7 @@ import hr.fina.student.projekt.mapper.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
@@ -384,6 +386,94 @@ public class ListingDaoImpl implements ListingDao {
             log.error("Error deleting listing", e.getCause());
             throw new DatabaseException("An error has occurred in deleting listing");
         }
+    }
+
+    @Override
+    public List<Listing> findListingsByFilter(ListingFilter listingFilter) {
+        StringBuilder FIND_LISTINGS_BY_FILTER = new StringBuilder("SELECT id, type_of_listing, rating, user_id, price FROM listings WHERE 1=1 ");
+        MapSqlParameterSource params = new MapSqlParameterSource();
+
+        if(listingFilter.getMinimalPrice() != null) {
+            FIND_LISTINGS_BY_FILTER.append(" AND price >= :minimalPrice ");
+            params.addValue("minimalPrice", listingFilter.getMinimalPrice());
+        }
+        if(listingFilter.getMaximalPrice() != null) {
+            FIND_LISTINGS_BY_FILTER.append(" AND price <= :maximalPrice ");
+            params.addValue("maximalPrice", listingFilter.getMaximalPrice());
+        }
+        if(listingFilter.getBedrooms() != null) {
+            FIND_LISTINGS_BY_FILTER.append(" AND number_of_bedrooms = :bedrooms ");
+            params.addValue("bedrooms", listingFilter.getBedrooms());
+        }
+        if(listingFilter.getBeds() != null) {
+            FIND_LISTINGS_BY_FILTER.append(" AND number_of_beds = :beds ");
+            params.addValue("beds", listingFilter.getBeds());
+        }
+        if(listingFilter.getBathrooms() != null) {
+            FIND_LISTINGS_BY_FILTER.append(" AND number_of_bathrooms = :bathrooms ");
+            params.addValue("bathrooms", listingFilter.getBathrooms());
+        }
+        if(listingFilter.getLocation() != null) {
+            FIND_LISTINGS_BY_FILTER.append(
+               " AND id IN ( " +
+                        "SELECT la.listing_id FROM listingamenities la " +
+                        "JOIN amenities a ON la.amenities_id = a.id " +
+                        "WHERE a.description = :location " +
+                    ")"
+            );
+            params.addValue("location", listingFilter.getLocation());
+        }
+
+        if(listingFilter.getTypeOfListing() != null) {
+            FIND_LISTINGS_BY_FILTER.append(" AND type_of_listing = :typeOfListing ");
+            params.addValue("typeOfListing", listingFilter.getTypeOfListing());
+        }
+
+        if(listingFilter.getAmenities() != null && !listingFilter.getAmenities().isEmpty()) {
+            FIND_LISTINGS_BY_FILTER.append(
+                " AND id IN ( " +
+                    "SELECT listing_id FROM listingamenities la " +
+                    "JOIN amenities a ON la.amenities_id = a.id " +
+                    "WHERE a.description IN (:amenities) " +
+                ")"
+            );
+            params.addValue("amenities", listingFilter.getAmenities());
+        }
+
+        if(listingFilter.getSpeaksLanguages() != null && !listingFilter.getSpeaksLanguages().isEmpty() ) {
+            FIND_LISTINGS_BY_FILTER.append(
+                " AND id IN ( " +
+                    "SELECT l.id FROM listings l " +
+                    "JOIN users u ON l.user_id = u.id " +
+                    "WHERE u.speaks_languages && CAST(:speaksLanguages AS text[])" +
+                ")"
+            );
+            params.addValue("speaksLanguages", listingFilter.getSpeaksLanguages().toArray(new String[0]));
+        }
+        try {
+            List<Listing> listings = jdbc.query(FIND_LISTINGS_BY_FILTER.toString(), params, new ListingSecondRowMapper());
+            for(Listing listing : listings) {
+                if(listing.getLocation() == null) {
+                    listing.setLocation(locationDao.findLocationByListingId(listing.getId()));
+                }
+                if(listing.getUser() == null) {
+                    listing.setUser(findUserByListingId(listing));
+                }
+                if(listing.getPhotos() == null) {
+                    listing.setPhotos(findPhotosByListingId(listing));
+                }
+            }
+            return listings;
+        } catch (EmptyResultDataAccessException emptyResultDataAccessException) {
+            log.error("No listings found with given filters");
+            return null;
+        } catch (Exception e) {
+            log.error("Error fetching listings by filter", e.getCause());
+            throw new DatabaseException("An error has occurred in fetching listings by filter");
+        }
+      
+        
+        
     }
 
 }
