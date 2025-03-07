@@ -177,6 +177,18 @@ public class ListingServiceImpl implements ListingService {
         if(filters.get("speaksLanguages") != null) {
             listingFilter.setSpeaksLanguages(List.of(filters.get("speaksLanguages").split(",")));
         }
+        if(filters.get("fullAddress") != null) {
+            listingFilter.setFullAddress(filters.get("fullAddress"));
+        }
+        if(filters.get("arrival") != null) {
+            listingFilter.setArrival(filters.get("arrival"));
+        }
+        if(filters.get("departure") != null) {
+            listingFilter.setDeparture(filters.get("departure"));
+        }
+        if(filters.get("numberOfGuests") != null) {
+            listingFilter.setNumberOfGuests(Integer.parseInt(filters.get("numberOfGuests")));
+        }
         return listingDao.findListingsByFilter(listingFilter);
         
 

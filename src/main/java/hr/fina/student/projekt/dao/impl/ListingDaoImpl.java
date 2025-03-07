@@ -21,6 +21,9 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -391,6 +394,12 @@ public class ListingDaoImpl implements ListingDao {
         }
     }
 
+    private Date convertStringToDate(String dateString) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        LocalDate localDate = LocalDate.parse(dateString, formatter);
+        return Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+    };
+
     @Override
     public List<Listing> findListingsByFilter(ListingFilter listingFilter) {
         StringBuilder FIND_LISTINGS_BY_FILTER = new StringBuilder("SELECT id, type_of_listing, rating, user_id, price FROM listings WHERE 1=1 ");
@@ -453,6 +462,42 @@ public class ListingDaoImpl implements ListingDao {
             );
             params.addValue("speaksLanguages", listingFilter.getSpeaksLanguages().toArray(new String[0]));
         }
+
+        if(listingFilter.getFullAddress() != null && !listingFilter.getFullAddress().isEmpty()) {
+            FIND_LISTINGS_BY_FILTER.append(" AND id IN (SELECT listing_id FROM locations WHERE full_address ILIKE :fullAddress) ");
+            params.addValue("fullAddress", "%" + listingFilter.getFullAddress() + "%");
+
+            
+        }
+
+        
+
+        if(listingFilter.getArrival() != null && listingFilter.getDeparture() != null) {
+            Date arrival = null;
+            Date departure = null;
+            if(listingFilter.getArrival().getClass() == String.class && listingFilter.getDeparture().getClass() == String.class) {
+                arrival = convertStringToDate((String)listingFilter.getArrival());
+                departure = convertStringToDate((String)listingFilter.getDeparture());
+            }
+            
+            FIND_LISTINGS_BY_FILTER.append(
+                " AND NOT EXISTS ( " +
+                    "SELECT 1 FROM reservations r " +
+                    "WHERE r.listing_id = listings.id " +
+                    "AND (:arrival < r.reserved_until AND :departure > r.reserved_from) " +
+                ") "
+            );
+            params.addValue("arrival", arrival);
+            params.addValue("departure", departure);
+        }
+
+        if(listingFilter.getNumberOfGuests() != null) {
+            FIND_LISTINGS_BY_FILTER.append(
+               " AND maximum_guests >= :numberOfGuests"
+            );
+            params.addValue("numberOfGuests", listingFilter.getNumberOfGuests());
+        }
+
         try {
             List<Listing> listings = jdbc.query(FIND_LISTINGS_BY_FILTER.toString(), params, new ListingSecondRowMapper());
             for(Listing listing : listings) {

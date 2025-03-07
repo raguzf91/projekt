@@ -23,6 +23,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import static java.lang.Integer.parseInt;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.PostMapping;
+
 
 
 
@@ -110,8 +112,22 @@ public class UserController {
                 );
          
             }
-        
+
             @GetMapping("/{id}/reservations/listing/{listingId}")
+            public ResponseEntity<HttpResponse> getListingReservations(@PathVariable("id") Integer id, @PathVariable("listingId") Integer listingId) {
+                return ResponseEntity.ok().body(
+                        HttpResponse.builder()
+                                .timeStamp(now().toString())
+                                .data(Map.of("reservations", userService.findReservationsByListingId(listingId)))
+                                .message("Reservations fetched successfully")
+                                .status(OK)
+                                .statusCode(OK.value())
+                                .build()
+                );
+            }
+            
+        
+            @GetMapping("/{id}/reservations/listing/{listingId}/is-reserved")
             public ResponseEntity<HttpResponse> getReservation(@PathVariable("id") Integer id, @PathVariable("listingId") Integer listingId) {
                 return ResponseEntity.ok().body(
                         HttpResponse.builder()
@@ -123,6 +139,36 @@ public class UserController {
                                 .build()
                 );
             }
+
+            @PostMapping("/{id}/like-listing/{listingId}")
+            public ResponseEntity<HttpResponse> likeListing(@PathVariable("id") Integer id, @PathVariable("listingId") Integer listingId) {
+                    return ResponseEntity.ok().body(
+                        HttpResponse.builder()
+                                .timeStamp(now().toString())
+                                .data(Map.of("isLiked", userService.likeListing(id, listingId)))
+                                .message("Listing liked successfully")
+                                .status(OK)
+                                .statusCode(OK.value())
+                                .build()
+                    );
+                
+            }
+
+            @GetMapping("/{id}/is-listing-liked/{listingId}")
+            public ResponseEntity<HttpResponse> isListingLiked(@PathVariable("id") Integer id, @PathVariable("listingId") Integer listingId) {
+                return ResponseEntity.ok().body(
+                        HttpResponse.builder()
+                                .timeStamp(now().toString())
+                                .data(Map.of("isLiked", userService.isListingLiked(id, listingId)))
+                                .message("Listing liked fetched successfully")
+                                .status(OK)
+                                .statusCode(OK.value())
+                                .build()
+                );
+            }
+            
+
+           
         
         
         }

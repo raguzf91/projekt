@@ -21,5 +21,7 @@ public interface    UserDao<T extends User> {
     Boolean deleteUser(Integer userId);
     Integer getNumberOfReviews(Integer id);
     List<Review> findAllReviews(Integer id);
+    Boolean likeListing(Integer id, Integer listingId);
+    Boolean isListingLiked(Integer userId, Integer listingId);
     
 }

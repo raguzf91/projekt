@@ -237,6 +237,45 @@ public class UserDaoImpl implements UserDao<User>, UserDetailsService {
         }
     }
 
+    @Override
+    public Boolean isListingLiked(Integer userId, Integer listingId) {
+        try {
+            final String FIND_LIKED_LISTING = """
+                    SELECT 1 FROM likedlistings WHERE user_id = :userId AND listing_id = :listingId
+                    """;
+            jdbcTemplate.queryForObject(FIND_LIKED_LISTING, Map.of("userId", userId, "listingId", listingId), Integer.class);
+            return true;
+        } catch (EmptyResultDataAccessException e) {
+            return false;
+        } catch (Exception e) {
+            log.error("Error finding liked listing: " + e.getCause());
+            throw new DatabaseException("An error occured in finding the liked listing");
+        } 
+    }
+
+
+    @Override
+    public Boolean likeListing(Integer id, Integer listingId) {
+       try {
+        final String INSERT_LIKE = """
+                INSERT INTO likedlistings (user_id, listing_id) VALUES (:userId, :listingId)
+                """;
+        final String REMOVE_LIKE = """
+                DELETE FROM likedlistings WHERE user_id = :userId AND listing_id = :listingId
+                """;
+        if(isListingLiked(id, listingId)) {
+            jdbcTemplate.update(REMOVE_LIKE, Map.of("userId", id, "listingId", listingId));
+            return false;
+        } else {
+            jdbcTemplate.update(INSERT_LIKE, Map.of("userId", id, "listingId", listingId));
+            return true;
+        }
+       } catch (Exception e) {
+              log.error("Error liking listing: " + e.getCause());
+              throw new DatabaseException("An error occured in liking the listing");
+       }
+    }
+
 
 
 

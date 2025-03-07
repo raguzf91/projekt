@@ -23,5 +23,9 @@ public class ListingFilter {
     private String typeOfListing;
     private List<String> amenities;
     private List<String> speaksLanguages;
+    private String fullAddress;
+    private String arrival;
+    private String departure;
+    private Integer numberOfGuests;
 
 }

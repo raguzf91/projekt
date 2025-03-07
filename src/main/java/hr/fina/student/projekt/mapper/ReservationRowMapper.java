@@ -17,6 +17,7 @@ public class ReservationRowMapper implements RowMapper<Reservation> {
         reservation.setListingId(rs.getInt("listing_id"));
         reservation.setUserId(rs.getInt("user_id"));
         reservation.setCanceled(rs.getBoolean("canceled"));
+        reservation.setValid(rs.getBoolean("valid"));
         return reservation;
     }
     

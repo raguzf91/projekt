@@ -27,7 +27,7 @@ public class ReservationDaoImpl implements ReservationDao {
         log.info("Finding reservations by user id");
         try {
             final String FIND_RESERVATIONS_BY_USER_ID = """
-                    SELECT * FROM reservations WHERE user_id = :id
+                    SELECT * FROM reservations WHERE user_id = :id AND valid = true
                     """;
             List<Reservation> reservations = jdbcTemplate.query(FIND_RESERVATIONS_BY_USER_ID, Map.of("id", id), new ReservationRowMapper());
             for(Reservation reservation : reservations) {
@@ -53,10 +53,12 @@ public class ReservationDaoImpl implements ReservationDao {
         log.info("Finding reservation");
         try {
             final String FIND_RESERVATION = """
-                    SELECT canceled FROM Reservations WHERE listing_id=:listingId AND user_id=:userId
+                    SELECT * FROM Reservations WHERE listing_id=:listingId AND user_id=:userId
                     """;
-            Boolean canceled = jdbcTemplate.queryForObject(FIND_RESERVATION, Map.of("listingId", listingId, "userId", userId), Boolean.class);
-            if(canceled == false   ) {
+            Reservation reservation = jdbcTemplate.queryForObject(FIND_RESERVATION, Map.of("listingId", listingId, "userId", userId), new ReservationRowMapper());
+            Boolean canceled = reservation.getCanceled();
+            Boolean valid = reservation.getValid();
+            if(canceled == false && valid == true ) {
                 return true;
             } else {
                 return false;
@@ -93,6 +95,29 @@ public class ReservationDaoImpl implements ReservationDao {
             throw new RuntimeException("Error while deleting reservation");
         }
     }
+
+    @Override
+    public List<Reservation> findReservationsByListingId(Integer listingId) {
+        log.info("Finding reservations by listing id");
+        try {
+            final String FIND_RESERVATIONS_BY_LISTING_ID = """
+                    SELECT * FROM reservations WHERE listing_id = :listingId AND valid = true
+                    """;
+            List<Reservation> reservations = jdbcTemplate.query(FIND_RESERVATIONS_BY_LISTING_ID, Map.of("listingId", listingId), new ReservationRowMapper());
+            return reservations;
+        } catch(DatabaseException e) {
+            log.error("Error while finding reservations by listing id");
+            throw new DatabaseException("Error while finding reservations by listing id");
+        }
+        catch (Exception e) {
+            log.error("Error while finding reservations by listing id");
+            throw new RuntimeException("Error while finding reservations by listing id");
+        }
+    }
+
+    
+
+    
     
     
 }

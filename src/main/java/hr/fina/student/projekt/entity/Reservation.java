@@ -22,5 +22,6 @@ public class Reservation extends BaseEntity {
     private Double paymentAmount;
     private Integer userId;
     private Boolean canceled;
+    private Boolean valid;
     
 }

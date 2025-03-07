@@ -19,4 +19,7 @@ public interface UserService {
     List<Reservation> findReservationsByUserId(Integer id);
     List<Reservation> deleteReservation(Integer reservationId, Integer userId);
     Boolean findReservation(Integer listingId, Integer userId);
+    List<Reservation> findReservationsByListingId(Integer listingId);
+    Boolean likeListing(Integer userId, Integer listingId);
+    Boolean isListingLiked(Integer userId, Integer listingId);
 }

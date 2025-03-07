@@ -272,5 +272,21 @@ public class UserServiceImpl implements UserService {
         return reservationsDao.findReservation(listingId, userId);
     }
 
+    @Override
+    public List<Reservation> findReservationsByListingId(Integer listingId) {
+        return reservationsDao.findReservationsByListingId(listingId);
+    }
+
+    @Override
+    public Boolean likeListing(Integer userId, Integer listingId) {
+        return userRepository.likeListing(userId, listingId);
+
+    }
+
+    @Override
+    public Boolean isListingLiked(Integer userId, Integer listingId) {
+        return userRepository.isListingLiked(userId, listingId);
+    }
+
     
 }

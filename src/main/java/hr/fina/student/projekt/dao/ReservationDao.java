@@ -9,4 +9,5 @@ public interface ReservationDao {
     List<Reservation> findReservationsByUserId(Integer id);
     List<Reservation> deleteReservation(Integer reservationId, Integer userId);
     Boolean findReservation(Integer listingId, Integer userId);
+    List<Reservation> findReservationsByListingId(Integer listingId);
 } 
