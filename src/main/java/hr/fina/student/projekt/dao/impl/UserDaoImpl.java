@@ -32,6 +32,7 @@ import hr.fina.student.projekt.exceptions.database.DatabaseException;
 import hr.fina.student.projekt.exceptions.user.UserAlreadyExistsException;
 import hr.fina.student.projekt.mapper.UserRowMapper;
 import hr.fina.student.projekt.mapper.ReviewRowMapper;
+import hr.fina.student.projekt.mapper.ListingSecondRowMapper;
 import hr.fina.student.projekt.mapper.ReservationRowMapper;
 
 @Repository
@@ -277,6 +278,10 @@ public class UserDaoImpl implements UserDao<User>, UserDetailsService {
     }
 
 
+   
+    }
+
+
 
 
    
@@ -290,4 +295,4 @@ public class UserDaoImpl implements UserDao<User>, UserDetailsService {
     
     
 
-}
+

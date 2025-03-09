@@ -2,6 +2,7 @@ package hr.fina.student.projekt.dao;
 
 import org.springframework.dao.DataAccessException;
 
+import hr.fina.student.projekt.entity.Listing;
 import hr.fina.student.projekt.entity.Reservation;
 import hr.fina.student.projekt.entity.Review;
 import hr.fina.student.projekt.entity.Token;
@@ -23,5 +24,6 @@ public interface    UserDao<T extends User> {
     List<Review> findAllReviews(Integer id);
     Boolean likeListing(Integer id, Integer listingId);
     Boolean isListingLiked(Integer userId, Integer listingId);
+    
     
 }

@@ -2,6 +2,7 @@ package hr.fina.student.projekt.service;
 import java.util.List;
 import hr.fina.student.projekt.entity.Review;
 import hr.fina.student.projekt.entity.User;
+import hr.fina.student.projekt.entity.Listing;
 import hr.fina.student.projekt.entity.Reservation;
 import jakarta.mail.MessagingException;
 
@@ -22,4 +23,6 @@ public interface UserService {
     List<Reservation> findReservationsByListingId(Integer listingId);
     Boolean likeListing(Integer userId, Integer listingId);
     Boolean isListingLiked(Integer userId, Integer listingId);
+    List<Listing> findLikedListings(Integer id);
+    List<Listing> findListingsByUserId(Integer id);
 }

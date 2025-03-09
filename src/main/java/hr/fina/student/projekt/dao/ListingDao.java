@@ -17,4 +17,5 @@ public interface ListingDao {
     void bookListing(Integer listingId, Integer userId, Date checkIn, Date checkOut, Double paymentAmount, Integer numberOfGuests);
     void deleteListing(Integer listingId);
     List<Listing> findListingsByFilter(ListingFilter listingRequest);
+    List<Listing> findLikedListingsByUserId(Integer id);
 }

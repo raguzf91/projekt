@@ -4,6 +4,7 @@ import hr.fina.student.projekt.dao.ListingDao;
 import hr.fina.student.projekt.dao.ReservationDao;
 import hr.fina.student.projekt.dao.TokenDao;
 import hr.fina.student.projekt.dao.UserDao;
+import hr.fina.student.projekt.entity.Listing;
 import hr.fina.student.projekt.entity.Reservation;
 import hr.fina.student.projekt.entity.Review;
 import hr.fina.student.projekt.entity.Token;
@@ -287,6 +288,18 @@ public class UserServiceImpl implements UserService {
     public Boolean isListingLiked(Integer userId, Integer listingId) {
         return userRepository.isListingLiked(userId, listingId);
     }
+
+    @Override
+    public List<Listing> findLikedListings(Integer id) {
+        return listingDao.findLikedListingsByUserId(id);
+    }
+
+    @Override
+    public List<Listing> findListingsByUserId(Integer id) {
+        return listingDao.findLikedListingsByUserId(id);
+    }
+
+
 
     
 }

@@ -166,6 +166,32 @@ public class UserController {
                                 .build()
                 );
             }
+
+            @GetMapping("/{id}/liked-listings")
+            public ResponseEntity<HttpResponse> getLikedListings(@PathVariable("id") Integer id) {
+                return ResponseEntity.ok().body(
+                        HttpResponse.builder()
+                                .timeStamp(now().toString())
+                                .data(Map.of("listings", userService.findLikedListings(id)))
+                                .message("Liked listings fetched successfully")
+                                .status(OK)
+                                .statusCode(OK.value())
+                                .build()
+                );
+            }
+
+            @GetMapping("/{id}/listings")
+            public ResponseEntity<HttpResponse> getListings(@PathVariable("id") Integer id) {
+                return ResponseEntity.ok().body(
+                        HttpResponse.builder()
+                                .timeStamp(now().toString())
+                                .data(Map.of("listings", userService.findListingsByUserId(id)))
+                                .message("Listings fetched successfully")
+                                .status(OK)
+                                .statusCode(OK.value())
+                                .build()
+                );
+            }
             
 
            

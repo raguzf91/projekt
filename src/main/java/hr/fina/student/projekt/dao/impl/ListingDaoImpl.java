@@ -519,9 +519,39 @@ public class ListingDaoImpl implements ListingDao {
             log.error("Error fetching listings by filter", e.getCause());
             throw new DatabaseException("An error has occurred in fetching listings by filter");
         }
-      
-        
-        
+
+
     }
 
+    
+    @Override
+    public List<Listing> findLikedListingsByUserId(Integer id) {        final String FIND_LIKED_LISTINGS = """
+                SELECT id, type_of_listing, rating, user_id, price FROM listings WHERE id IN (SELECT listing_id FROM likedlistings WHERE user_id = :id)
+                """;
+        try {
+            List<Listing> listings = jdbc.query(FIND_LIKED_LISTINGS, Map.of("id", id), new ListingSecondRowMapper());
+            if(listings.isEmpty()) {
+                return null;
+            }
+            
+            for(Listing listing : listings) {
+                if(listing.getLocation() == null) {
+                    listing.setLocation(locationDao.findLocationByListingId(listing.getId()));
+                }
+                if(listing.getUser() == null) {
+                    listing.setUser(findUserByListingId(listing));
+                }
+                if(listing.getPhotos() == null) {
+                    listing.setPhotos(findPhotosByListingId(listing));
+                }
+            }
+            return listings;
+        } catch (Exception e) {
+            log.error("Error finding liked listings: " + e.getCause());
+            throw new DatabaseException("An error occured in finding the liked listings");
+        }
+  
+    
+    
+}
 }

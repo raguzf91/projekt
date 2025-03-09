@@ -64,7 +64,13 @@ public class SecurityConfig {
             .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/api/amenity/**")).permitAll()
             .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/api/user/**")).permitAll().requestMatchers(HttpMethod.OPTIONS,"/**").permitAll()
             
-            .requestMatchers(HttpMethod.POST, "/api/listing/create").hasAuthority("CREATE:LISTING")          
+            .requestMatchers(HttpMethod.POST, "/api/listing/create").hasAuthority("CREATE:LISTING")
+            .requestMatchers(HttpMethod.POST, "/api/user/{id}/edit-profile").hasAuthority("EDIT:PROFILE")
+            .requestMatchers(HttpMethod.DELETE, "/api/user/{id}/reservations/{reservationId}").hasAuthority("DELETE:RESERVATION")
+            .requestMatchers(HttpMethod.POST, "/api/user/{id}/like-listing/{listingId}").hasAuthority("LIKE:LISTING")
+            .requestMatchers(HttpMethod.POST, "/api/listing/{id}/booking").hasAuthority("RESERVE:LISTING")
+           
+
 			.anyRequest().authenticated()               
 			)
             .oauth2Login(oauth2 -> oauth2
